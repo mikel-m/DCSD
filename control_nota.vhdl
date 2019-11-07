@@ -7,8 +7,8 @@ entity control_nota is
     clk     : in std_logic;
     reset_l : in std_logic;
     pulsado    : in std_logic;
-    rom_dat  : in std_logic;
-    muestra : in std_logic_vector(2 downto 0);
+    rom_dat  : in std_logic_vector(11 downto 0);
+    nota : in std_logic_vector(2 downto 0);
     freq: out std_logic_vector(11 downto 0);
     rom_dir  : out std_logic_vector(2 downto 0)
     enable  : out std_logic
@@ -29,7 +29,6 @@ SIGNAL EP, ES	: estado;
   signal rom_out : std_logic_vector(11 downto 0);
 -- Cargar la nota de la rom
   signal ld_dat  : std_logic;
-  signal nota    : std_logic_vector(2 downto 0);
   
   signal rom_in : std_logic_vector(2 downto 0);
   signal rom_freq:
