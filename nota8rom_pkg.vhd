@@ -8,7 +8,7 @@ package nota8rom_pkg is
 end nota8rom_pkg;
 
 package body nota8rom_pkg is
-  constant nota8rom : rom := (
+  constant nota8rom : rom_nota := (
     B"0001_0000_0101", --DO
     B"0001_0010_0101", --RE
     B"0001_0100_1001", --MI
@@ -17,4 +17,5 @@ package body nota8rom_pkg is
     B"0001_1110_1101", --SI
     B"0001_1011_1000", --LA
     B"0010_0000_1011"  --DO_A
+  );
 end package body nota8rom_pkg;

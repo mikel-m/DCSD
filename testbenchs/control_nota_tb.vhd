@@ -3,7 +3,6 @@ use ieee.std_logic_1164.all ;
 use ieee.numeric_std.all ;
 
 entity control_nota_tb is
-  port () ;
 end control_nota_tb ; 
 
 architecture arch1 of control_nota_tb is
@@ -22,7 +21,7 @@ architecture arch1 of control_nota_tb is
   signal rom_dat : std_logic_vector(11 downto 0);
   signal rom_dir : std_logic_vector(2 downto 0);
   signal freq : std_logic_vector(11 downto 0);
-  signal enable: std_logic_vector;
+  signal enable: std_logic;
 
 
   component control_nota is
@@ -30,10 +29,8 @@ architecture arch1 of control_nota_tb is
       clk     : in std_logic;
       reset_l : in std_logic;
       pulsado : in std_logic;
-      rom_dat : in std_logic;
-      muestra : in std_logic_vector(2 downto 0);
+      nota    : in std_logic_vector(2 downto 0);
       freq    : out std_logic_vector(11 downto 0);
-      rom_dir : out std_logic_vector(2 downto 0);
       enable  : out std_logic
       ) ;
   end component ; 
@@ -44,7 +41,7 @@ begin
   estim_reset : process
   begin
     reset_l <= '0';
-    wait 31 ns;
+    wait for 31 ns;
     reset_l <= '1';
     wait;
   end process; -- estim_reset
@@ -54,29 +51,27 @@ begin
       clk     => clk,
       reset_l => reset_l,
       pulsado => pulsado,
-      rom_dat => rom_dat,
-      -- muestra :  in std_logic_vector(2 downto 0),
+      nota =>  nota,
       freq => freq,
-      rom_dir  => rom_dir,
       enable => enable
     );
   
-  rom_dat <= nota8rom(to_integer(rom_dir));
+  
 
   estimulos : process
   begin
     nota <= "000";
-    pulsado <= '0'
-    wait 45 ns;
-    nota <= "110";
-    wait HALF_PERIOD_CLK;
-    pulsado <= '1';
-    wait PERIOD_DACLRC*20;
     pulsado <= '0';
-    wait HALF_PERIOD_CLK;
+    wait for 45 ns;
+    nota <= "110";
+    wait for HALF_PERIOD_CLK;
+    pulsado <= '1';
+    wait for PERIOD_DACLRC*20;
+    pulsado <= '0';
+    wait for HALF_PERIOD_CLK;
     nota <= "011";
-    wait HALF_PERIOD_CLK;
-    puslado <= '1';
+    wait for HALF_PERIOD_CLK;
+    pulsado <= '1';
     wait;
   end process; -- estimulos
   

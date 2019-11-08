@@ -102,20 +102,10 @@ architecture rtl_0 of DE1SOC_xxx is
     signal freq    : std_logic_vector(11 downto 0);
 	signal vol     : std_logic_vector(3 downto 0) := B"0000";
 
-	signal my_keys: std_logic_vector(3 downto 0);
+	
 
 	signal cnt : unsigned(2 downto 0);
-	type rom is array (0 to 7) of std_logic_vector(11 downto 0);
-	constant rom_notes : rom := (
-		B"0001_0000_0101", --DO
-		B"0001_0010_0101", --RE
-		B"0001_0100_1001", --MI
-		B"0001_0101_1101", --FA
-		B"0001_1000_0111", --SOL
-		B"0001_1110_1101", --SI
-		B"0001_1011_1000", --LA
-		B"0010_0000_1011"  --DO_A
-		);
+
 	type rom1 is array (0 to 7) of std_logic_vector(3 downto 0);
 	constant rom_seg_0 : rom1 := (
 		"0010", --DO   --261
@@ -201,7 +191,18 @@ architecture rtl_0 of DE1SOC_xxx is
 		siguiente_muestra: out std_logic;
 		dacdat  : out std_logic
 	) ;
-   	end component;
+	
+	end component;
+	component control_nota is
+	port (
+		clk     : in std_logic;
+		reset_l : in std_logic;
+		pulsado : in std_logic;
+		nota    : in std_logic_vector(2 downto 0);
+		freq    : out std_logic_vector(11 downto 0);
+		enable  : out std_logic
+		) ;
+	end component ; 
 	signal muestra: std_logic_vector(15 downto 0) := B"0000_0000_1111_1111";
 	signal siguiente_muestra: std_logic;
 	
@@ -238,8 +239,9 @@ architecture rtl_0 of DE1SOC_xxx is
 			dig	: out	std_logic_vector(6 downto 0)
 		);
 	end component;
-
-	
+	signal enable: std_logic;
+	--Señales limpias
+	signal my_keys: std_logic_vector(3 downto 0);
 begin 
 	--  Input PINs Asignements
     clk <= CLOCK_50;
@@ -249,8 +251,6 @@ begin
 	-- Output PINs Asignements
 	LEDR <= freq(9 downto 0);	
 	leds <= cnt;
-	
-	
 
 	DUT: enviar_muestra  
     port map ( 
@@ -261,7 +261,16 @@ begin
         muestra => muestra,
         dacdat => AUD_DACDAT,
         siguiente_muestra => siguiente_muestra
-    ); 
+	); 
+	cnt_nota: control_nota
+    port map(
+      clk     => clk,
+      reset_l => reset_l,
+      pulsado => my_keys(3),
+      nota =>  SW(8) & SW(7) & SW(6),
+      freq => freq,
+      enable => enable
+    );
 	 
 	 mic_lin <= '0';
 	 vol <= SW(3) & SW(2) & SW(1) & SW(0);
@@ -282,16 +291,18 @@ begin
         freq        => freq, -- frecuencia en hz (entero, sin decimales)
         voldec      => vol, -- nivel de reducción de volumen (0 a 15)
         nextsample  => siguiente_muestra,
-        enable      => SW(9),
+        enable      => enable,
         sample      => muestra
         );
-    
-
-	freq <= rom_notes(to_integer(SW(8) & SW(7) & SW(6)));
 	
 	
-	limpiar_senales : process (clk)
+	limpiar_senales : process (clk, reset_l)
 	begin
+		if reset_l  = '0' then
+			my_keys <= "0000";
+		elsif clk'event and clk = '1' then
+			my_keys <= KEY;
+		end if ;
 		my_keys <= KEY;
 	end process; -- limpiar_senales
 	
