@@ -193,6 +193,7 @@ architecture rtl_0 of DE1SOC_xxx is
 	) ;
 	
 	end component;
+
 	component control_nota is
 	port (
 		clk     : in std_logic;
@@ -242,16 +243,26 @@ architecture rtl_0 of DE1SOC_xxx is
 	signal enable: std_logic;
 	--Señales limpias
 	signal my_keys: std_logic_vector(3 downto 0);
+	signal my_keys_1: std_logic_vector(3 downto 0);
+	signal my_keys_2: std_logic_vector(3 downto 0);
+	signal my_keys_limpio: std_logic_vector(3 downto 0);
+	
+	signal sw_1: std_logic_vector(9 downto 0);
+	signal sw_2: std_logic_vector(9 downto 0);
+	signal sw_l: std_logic_vector(9 downto 0);
+	signal pulsado: std_logic;
 begin 
 	--  Input PINs Asignements
     clk <= CLOCK_50;
     reset <= not reset_l; 
 	reset_l <= KEY(0);
+	pulsado <= not my_keys_limpio(3);
 	
 	-- Output PINs Asignements
 	LEDR <= freq(9 downto 0);	
 	leds <= cnt;
-
+	my_keys_limpio <= KEY;
+	sw_l <= SW;
 	DUT: enviar_muestra  
     port map ( 
         clk => clk,
@@ -262,18 +273,19 @@ begin
         dacdat => AUD_DACDAT,
         siguiente_muestra => siguiente_muestra
 	); 
-	cnt_nota: control_nota
-    port map(
-      clk     => clk,
-      reset_l => reset_l,
-      pulsado => my_keys(3),
-      nota =>  SW(8) & SW(7) & SW(6),
-      freq => freq,
-      enable => enable
-    );
-	 
+	
+	-- cnt_nota: control_nota
+    -- port map(
+    --   clk     => clk,
+    --   reset_l => reset_l,
+    --   pulsado => pulsado,
+    --   nota =>  SW(8) & SW(7) & SW(6),
+    --   freq => freq,
+    --   enable => enable
+    -- );
+	 enable <= '1';
 	 mic_lin <= '0';
-	 vol <= SW(3) & SW(2) & SW(1) & SW(0);
+	 vol <= sw_l(3) & sw_l(2) & sw_l(1) & sw_l(0);
 	 
 	 AU: au_setup
 	 port map (
@@ -288,7 +300,7 @@ begin
     port map(	
         clk_50      => clk,
         reset       => reset,
-        freq        => freq, -- frecuencia en hz (entero, sin decimales)
+        freq        => B"0001_0000_0101", -- frecuencia en hz (entero, sin decimales)
         voldec      => vol, -- nivel de reducción de volumen (0 a 15)
         nextsample  => siguiente_muestra,
         enable      => enable,
@@ -299,11 +311,18 @@ begin
 	limpiar_senales : process (clk, reset_l)
 	begin
 		if reset_l  = '0' then
-			my_keys <= "0000";
+			my_keys <= "111" & KEY(0); -- El 0 es el reset, que no hay que modificar
+			my_keys_1 <= "111" & KEY(0);
+			my_keys_2 <= "111" & KEY(0);
+			sw_1 <= B"00_0000_0000";
+			sw_2 <= B"00_0000_0000";
 		elsif clk'event and clk = '1' then
 			my_keys <= KEY;
+			my_keys_1 <= my_keys;
+			my_keys_2 <= my_keys_1;
+			sw_1 <= SW;
+			sw_2 <= sw_1;
 		end if ;
-		my_keys <= KEY;
 	end process; -- limpiar_senales
 	
 	-- Registro contador de TICs de clk 

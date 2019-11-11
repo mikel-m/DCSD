@@ -90,7 +90,7 @@ begin
     if reset_l = '0' then
       rom_freq <=  B"0000_0000_0000";
     elsif rising_edge(clk) then
-      if ld_dir = '1' then
+      if ld_dat = '1' then
         rom_freq <= rom_out;
       end if ;
     end if ;
