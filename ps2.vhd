@@ -1,7 +1,6 @@
 library ieee ;
     use ieee.std_logic_1164.all ;
     use ieee.numeric_std.all ;
-    use work.nota8rom_pkg.all;
 
 entity ps2 is
   port (
@@ -15,8 +14,8 @@ entity ps2 is
 end ps2 ; 
 
 architecture arch1 of ps2 is
-  TYPE estado is (E_INICIO, E_PINCIPIO, E_ESPERA_START, E_CARGAR_BIT,E_ESPERA_1,
-        E_ESPERA_2,E_ESPERA_3,E_ESPERA_STOP,E_LECTURA_TERMINADA,E_INICIO_1,E_INICIO_2,E_INICIO_3);
+  TYPE estado is (E_INICIO, E_PRINCIPIO, E_ESPERA_START, E_CARGAR_BIT,E_ESPERA_1,
+        E_ESPERA_2,E_ESPERA_3,E_ESPERAR_STOP,E_LECTURA_TERMINADA,E_INICIO_1,E_INICIO_2,E_INICIO_3);
  
 SIGNAL EP, ES	: estado;
  --Cambios en el clk
@@ -30,16 +29,18 @@ SIGNAL EP, ES	: estado;
 --
   signal ld_dat_par : std_logic;
   signal dat_par : std_logic;
-  signal dat_par_eq_par :std_logic;
   signal ld_par : std_logic;
   signal par : std_logic;
-  signal ld_sr  : std_logic;
-  signal sr_in : std_logic_vector(7 downto 0);  --TODO cambiar nombre a r_in
-  signal sr_out_0  : std_logic_vector(7 downto 0);-- sr = shift register
-  signal sr_out_1  : std_logic_vector(7 downto 0);
-  signal sr_out_2  : std_logic_vector(7 downto 0);
+  signal ld_regs  : std_logic;
+  signal r_in : std_logic_vector(7 downto 0);  --TODO cambiar nombre a r_in
+  signal r_out_0  : std_logic_vector(7 downto 0);-- r = register
+  signal r_out_1  : std_logic_vector(7 downto 0);
+  signal r_out_2  : std_logic_vector(7 downto 0);
+  signal ld_r_0 : std_logic;
+  signal ld_r_1 : std_logic;
+  signal ld_r_2 : std_logic;
   signal ld_pulsado : std_logic;
-  constant momento : integer range 1 to 3;
+  signal momento : unsigned(1 downto 0);
  
   signal pulsado_in: std_logic;
   --señales de ayuda
@@ -51,12 +52,13 @@ SIGNAL EP, ES	: estado;
   signal mux_in_1: std_logic_vector(7 downto 0);
   signal mux_in_2: std_logic_vector(7 downto 0);
   signal mux_in_3: std_logic_vector(7 downto 0);
-
+  constant F0: std_logic_vector(7 downto 0) := B"1111_0000";
   --señales limpias, perfecto
   
   signal dat_l: std_logic;
   signal clk_ps2_l: std_logic;
 begin
+  dat_l <= data;
 ------------------------------------------------------
   --- Unidad de control
   UC : process( clk, reset_l )
@@ -68,13 +70,13 @@ begin
     end if ;
   end process ; -- UC
   
-  maquina_de_estados : process( EP,dat_par_eq_par,clk_ps2_ch_down,cont_eq_8,momento,shift_out_0,shift_out_1,shift_out_2)
+  maquina_de_estados : process( EP,clk_ps2_ch_down,cont_eq_8,momento,r_out_0,r_out_1,r_out_2)
   begin
     case EP is
       when E_INICIO => ES <= E_PRINCIPIO;
-      when E_PRINCIPIO => if clk_ps2_ch_down ='0' and data ='0'then
+      when E_PRINCIPIO => if clk_ps2_ch_down ='0' and dat_l ='0'then
                             ES <= E_PRINCIPIO;
-                        elsif clk_ps2_ch_down ='1' and data ='0' then
+                        elsif clk_ps2_ch_down ='1' and dat_l ='0' then
                             ES <= E_ESPERA_START;
                         end if;
       when E_ESPERA_START => if clk_ps2_ch_down ='0' then
@@ -82,9 +84,9 @@ begin
                          elsif clk_ps2_ch_down ='1' then
                             ES <= E_CARGAR_BIT;
                          end if;
-      when E_CARGAR_BIT => if (dat='1' or dat='0') and cont_eq_8='0' then
+      when E_CARGAR_BIT => if cont_eq_8='0' then
                             ES<= E_ESPERA_2;
-                         elsif (dat='1' or dat='0') and cont_eq_8='1' then
+                         elsif cont_eq_8='1' then
                             ES<= E_ESPERA_1;
                         end if ;
       when E_ESPERA_1 => if clk_ps2_ch_down ='0' then
@@ -97,9 +99,9 @@ begin
                         elsif clk_ps2_ch_down ='1' then
                             ES <= E_CARGAR_BIT;
                         end if;
-      when E_ESPERA_3 => if dat_par_eq_par='1' then
+      when E_ESPERA_3 => if dat_par=par then
                             ES <= E_ESPERAR_STOP;
-                         elsif dat_par_eq_par='0' then
+                         elsif dat_par=par then
                             ES <= E_PRINCIPIO;
                          end if;
       when E_ESPERAR_STOP => if clk_ps2_ch_down ='0' then
@@ -107,19 +109,24 @@ begin
                             elsif clk_ps2_ch_down ='1' then
                             ES <= E_LECTURA_TERMINADA;
                             end if;
-     when E_LECTURA_TERMINADA => if momento = "1" and shift_out_0="F0" then ---ARREGLAR todo este, igualdades
+     when E_LECTURA_TERMINADA => if momento = "01" and r_out_0=F0 then ---ARREGLAR todo esto, igualdades
                                 ES <= E_PRINCIPIO;
-                                elsif  momento = "1" and shift_out_0!="F0" then--arreglar solo bien el ES
+                                elsif  momento = "01" and r_out_0/=F0 then--arreglar solo bien el ES
                                 ES <= E_INICIO_2;
-                                elsif  momento = "2" and shift_out_1="F0" then--arreglar solo bien el ES
+                                elsif  momento = "10" and r_out_1=F0 then--arreglar solo bien el ES
                                 ES <= E_PRINCIPIO;
-                                elsif  momento = "2" and shift_out_1!="F0" then--arreglar solo bien el ES
+                                elsif  momento = "10" and r_out_1/=F0 then--arreglar solo bien el ES
                                 ES <= E_INICIO_3;                          
-                                elsif  momento = "3" and shift_out_2=shift_out_0 then--arreglar solo bien el ES
+                                elsif  momento = "11" and r_out_2=r_out_0 then--arreglar solo bien el ES
                                 ES <= E_PRINCIPIO;                                       
-                                elsif  momento = "3" and shift_out_2!=shift_out_0 then--arreglar solo bien el ES
-                                ES <= E_INICIO_1;                            
-                                 end if;
+                                elsif  momento = "11" and r_out_2/=r_out_0 then--arreglar solo bien el ES
+                                ES <= E_INICIO_1; 
+                                else 
+                                ES <= E_INICIO;
+                                end if;
+      when E_INICIO_2 => ES <= E_PRINCIPIO;
+      when E_INICIO_3 => ES <= E_PRINCIPIO;
+      when E_INICIO_1 => ES <= E_PRINCIPIO;
     end case ;
  
   end process ; -- ESTSIG
@@ -145,77 +152,83 @@ begin
   
 
   --Shifters y eso (TODO: Cambiar por registros normales)
-  sr_in <= dat_l & mux_out(6 downto 0);-- Esto hace de SR
+  r_in <= dat_l & mux_out(6 downto 0);
 
-  lds : process( momento, ld_sr )
+  lds : process( momento, ld_regs )
   begin
-    if ld_sr = '1' then
-      if momento = to_integer(1,2) then
-        ld_sr_0 <= '1';
-        ld_sr_1 <= '0';
-        ld_sr_2 <= '0';
-      elsif momento = to_integer(2,2) then
-        ld_sr_0 <= '0';
-        ld_sr_1 <= '1';
-        ld_sr_2 <= '0';
-      elsif momento = to_integer(3,2) then
-        ld_sr_0 <= '0';
-        ld_sr_1 <= '0';
-        ld_sr_2 <= '1';
+    if ld_regs = '1' then
+      if momento = to_unsigned(1,2) then
+        ld_r_0 <= '1';
+        ld_r_1 <= '0';
+        ld_r_2 <= '0';
+      elsif momento = to_unsigned(2,2) then
+        ld_r_0 <= '0';
+        ld_r_1 <= '1';
+        ld_r_2 <= '0';
+      elsif momento = to_unsigned(3,2) then
+        ld_r_0 <= '0';
+        ld_r_1 <= '0';
+        ld_r_2 <= '1';
       else
-        ld_sr_0 <= '0';
-        ld_sr_1 <= '0';
-        ld_sr_2 <= '0';
+        ld_r_0 <= '0';
+        ld_r_1 <= '0';
+        ld_r_2 <= '0';
       end if;
 
     else
-      ld_sr_0 <= '0';
-      ld_sr_1 <= '0';
-      ld_sr_2 <= '0';
+      ld_r_0 <= '0';
+      ld_r_1 <= '0';
+      ld_r_2 <= '0';
     end if ;
   end process ; -- lds
 -- Unidades Combinacionales
-  mux : process( momento, mux_in_0, mux_in_1, mux_in_2, mux_in_3 ) --WIP
+  mux : process( momento, mux_in_0, mux_in_1, mux_in_2, mux_in_3 )
   begin
-    mux_out <=  -- WIP
+    case momento is
+      when to_unsigned(0, 2) => mux_out <= mux_in_0;
+      when to_unsigned(1, 2) => mux_out <= mux_in_1;
+      when to_unsigned(2, 2) => mux_out <= mux_in_2;
+      when to_unsigned(3, 2) => mux_out <= mux_in_3;
+      when others => mux_out <= B"0000_0000";
+    end case;
   end process ; -- mux
--
+
 
 --- Unidades Secuenciales
   
-
-  sr_0 : process( clk, reset_l )
+  r_0 : process( clk, reset_l )
   begin
     if reset_l = '0' then
-      shift_out_0 <= B"0000_0000";
+      r_out_0 <= B"0000_0000";
     elsif rising_edge(clk) then
-        if ld_sr_0 = '1' then
-          sr_out_0 <= sr_in;
+        if ld_r_0 = '1' then
+          r_out_0 <= r_in;
         end if ;
     end if ;
-  end process ; -- sr_0
+  end process ; -- r_1
+  
 
-  sr_1 : process( clk, reset_l )
+  r_1 : process( clk, reset_l )
   begin
     if reset_l = '0' then
-      shift_out_1 <= B"0000_0000";
+      r_out_1 <= B"0000_0000";
     elsif rising_edge(clk) then
-        if ld_sr_1 = '1' then
-          sr_out_1 <= sr_in;
+        if ld_r_1 = '1' then
+          r_out_1 <= r_in;
         end if ;
     end if ;
-  end process ; -- sr_1
+  end process ; -- r_1
 
-  sr_2 : process( clk, reset_l )
+  r_2 : process( clk, reset_l )
   begin
     if reset_l = '0' then
-      shift_out_2 <= B"0000_0000";
+      r_out_2 <= B"0000_0000";
     elsif rising_edge(clk) then
-        if ld_sr_2 = '1' then
-          sr_out_2 <= sr_in;
+        if ld_r_2 = '1' then
+          r_out_2 <= r_in;
         end if ;
     end if ;
-  end process ; -- sr_2
+  end process ; -- r_2
 
   r_par : process( clk,reset_l )
   begin
@@ -257,19 +270,19 @@ begin
     if reset_l = '0' then
       pulsado <= '0';
     elsif rising_edge(clk) then
-      if ld_pulsado then
+      if ld_pulsado = '1' then
         pulsado <= pulsado_in;
       end if ;  
     end if ;
   end process ; -- r_pulsado
 
-  -- Proceso de ejemplo para copypaste
-  ej : process( clk, reset_l )
-  begin
-    if reset_l = '0' then
-    elsif rising_edge(clk) then
+  -- -- Proceso de ejemplo para copypaste
+  -- ej : process( clk, reset_l )
+  -- begin
+  --   if reset_l = '0' then
+  --   elsif rising_edge(clk) then
       
-    end if ;
-  end process ;
+  --   end if ;
+  -- end process ;
 
   end architecture ;
