@@ -85,21 +85,8 @@ architecture rtl_0 of DE1SOC_xxx is
     signal reset : std_logic; 
 	signal Leds 	: unsigned(2 downto 0);
 	
-	constant PERIOD_CLK 	: time := 20 ns;
-	constant SECOND 		: time := 1 sec;
-	constant TICS_PER_SECOND	: integer := SECOND / PERIOD_CLK;
-    
-    --Notas
-    constant DO    : std_logic_vector(11 downto 0) := B"0001_0000_0101"; --261
-    constant RE    : std_logic_vector(11 downto 0) := B"0001_0010_0101"; --293
-    constant MI    : std_logic_vector(11 downto 0) := B"0001_0100_1001"; --329
-    constant FA    : std_logic_vector(11 downto 0) := B"0001_0101_1101"; --349
-    constant SOL   : std_logic_vector(11 downto 0) := B"0001_1000_0111"; --391
-    constant SI    : std_logic_vector(11 downto 0) := B"0001_1110_1101"; --493
-    constant LA    : std_logic_vector(11 downto 0) := B"0001_1011_1000"; --440
-	constant DO_A  : std_logic_vector(11 downto 0) := B"0010_0000_1011"; --523
+	constant PERIOD_CLK 	: time := 20 ns;    
 	
-    signal freq    : std_logic_vector(11 downto 0);
 	signal vol     : std_logic_vector(3 downto 0) := B"0000";
 
 	
@@ -180,58 +167,28 @@ architecture rtl_0 of DE1SOC_xxx is
 
 
 	signal 	NumTicsXSecond 		: unsigned(31 downto 0);	-- Contador de TICs de clk
-	signal  	TicSec					: std_logic;					-- Ha pasado 1 segundo (se activa solo 1 ciclo de clk)
-	component enviar_muestra
+	signal  TicSec				: std_logic;				-- Ha pasado 1 segundo (se activa solo 1 ciclo de clk)
+	
+	component control_del_codec is
 		port (
-		clk     : in std_logic;
-		reset_l : in std_logic;
-		bclk    : in std_logic;
-		daclrc  : in std_logic;
-		muestra : in std_logic_vector(15 downto 0);
-		siguiente_muestra: out std_logic;
-		dacdat  : out std_logic
-	) ;
-	
-	end component;
-
-	component control_nota is
-	port (
-		clk     : in std_logic;
-		reset_l : in std_logic;
-		pulsado : in std_logic;
-		nota    : in std_logic_vector(2 downto 0);
-		freq    : out std_logic_vector(11 downto 0);
-		enable  : out std_logic
+		  clk     : in std_logic;
+		  reset_l : in std_logic;
+		  pulsado : in std_logic;
+		  nota    : in std_logic_vector(2 downto 0);
+		  vol     : in std_logic_vector(3 downto 0);
+		  bclk    : in std_logic;
+		  daclrc  : in std_logic;
+		  dacdat  : out std_logic;
+		  i2c_sclk: out std_logic;
+		  i2c_sdat: out std_logic;
+		  xck     : out std_logic
 		) ;
-	end component ; 
-	signal muestra: std_logic_vector(15 downto 0) := B"0000_0000_1111_1111";
-	signal siguiente_muestra: std_logic;
+	  end component ; 
+	  
 	
-	component au_setup 
-	port(
-		reset		:  IN STD_LOGIC;
-		clk_50 		:  IN STD_LOGIC;
-		mic_lin		:  IN STD_LOGIC;    -- si '1' MIC, si '0' LINEIN
-		i2c_sdat	:  INOUT STD_LOGIC;
-		i2c_sclk	:  OUT STD_LOGIC;
-		aud_xck		:  OUT STD_LOGIC
-	);
-    end component;
 
-    component sin_dds 
-    port(	
-        clk_50 		: in  std_logic;
-        reset 		: in  std_logic;
-        freq 		: in  std_logic_vector(11 downto 0); -- frecuencia en hz (entero, sin decimales)
-        voldec 		: in std_logic_vector(3 downto 0); -- nivel de reducción de volumen (0 a 15)
-        nextsample 	: in std_logic;
-        enable 		: in std_logic;
-        sample 		: out  std_logic_vector(15 downto 0)
-    );
-    end component;
 	signal i2c_sdat	:  STD_LOGIC;
 	signal i2c_sclk	:  STD_LOGIC;
-	signal mic_lin: std_logic;
 
 	component hex_7seg is
 		port
@@ -240,7 +197,6 @@ architecture rtl_0 of DE1SOC_xxx is
 			dig	: out	std_logic_vector(6 downto 0)
 		);
 	end component;
-	signal enable: std_logic;
 	--Señales limpias
 	signal my_keys: std_logic_vector(3 downto 0);
 	signal my_keys_1: std_logic_vector(3 downto 0);
@@ -253,8 +209,7 @@ architecture rtl_0 of DE1SOC_xxx is
 	signal pulsado: std_logic;
 begin 
 	--  Input PINs Asignements
-    clk <= CLOCK_50;
-    reset <= not reset_l; 
+    clk <= CLOCK_50; 
 	reset_l <= KEY(0);
 	pulsado <= not my_keys_limpio(3);
 	
@@ -263,51 +218,23 @@ begin
 	leds <= cnt;
 	my_keys_limpio <= KEY;
 	sw_l <= SW;
-	DUT: enviar_muestra  
-    port map ( 
-        clk => clk,
-        reset_l => reset_l,
-        bclk => AUD_BCLK,
-        daclrc => AUD_DACLRCK,
-        muestra => muestra,
-        dacdat => AUD_DACDAT,
-        siguiente_muestra => siguiente_muestra
-	); 
-	
-	-- cnt_nota: control_nota
-    -- port map(
-    --   clk     => clk,
-    --   reset_l => reset_l,
-    --   pulsado => pulsado,
-    --   nota =>  SW(8) & SW(7) & SW(6),
-    --   freq => freq,
-    --   enable => enable
-    -- );
-	 enable <= '1';
-	 mic_lin <= '0';
-	 vol <= sw_l(3) & sw_l(2) & sw_l(1) & sw_l(0);
-	 
-	 AU: au_setup
-	 port map (
-		reset	 => reset,
-		clk_50   => clk,
-		mic_lin	 => mic_lin,    -- si '1' MIC, si '0' LINEIN
-		i2c_sdat => FPGA_I2C_SDAT,
-		i2c_sclk => FPGA_I2C_SCLK,
-		aud_xck	 => AUD_XCK
-    );
-    DDS: sin_dds 
-    port map(	
-        clk_50      => clk,
-        reset       => reset,
-        freq        => B"0001_0000_0101", -- frecuencia en hz (entero, sin decimales)
-        voldec      => vol, -- nivel de reducción de volumen (0 a 15)
-        nextsample  => siguiente_muestra,
-        enable      => enable,
-        sample      => muestra
-        );
-	
-	
+	vol <= sw_l(3) & sw_l(2) & sw_l(1) & sw_l(0);
+
+	control_del_codec_comp : control_del_codec
+	port map (
+		  clk      => clk,
+		  reset_l  => reset_l,
+		  pulsado  => pulsado,
+		  nota     => nota,
+		  vol      => vol,
+		  bclk     => AUD_BCLK,
+		  daclrc   => AUD_ADCLRCK,
+		  dacdat   => AUD_DACDAT,
+		  i2c_sclk => FPGA_I2C_SCLK,
+		  i2c_sdat => FPGA_I2C_SDAT,
+		  xck      => AUD_XCK
+	) ;
+
 	limpiar_senales : process (clk, reset_l)
 	begin
 		if reset_l  = '0' then
@@ -325,37 +252,6 @@ begin
 		end if ;
 	end process; -- limpiar_senales
 	
-	-- Registro contador de TICs de clk 
-	-- (activa TicSec cada segundo durante 1 ciclo de clk)
-	process (clk, reset_l)
-	begin
-		if reset_l = '0' then
-			NumTicsXSecond <= (others => '0');
-			TicSec <= '0';
-		elsif clk'event and clk = '1' then
-			if (NumTicsXSecond = (TICS_PER_SECOND-1) ) then
-				TicSec <= '1';
-				NumTicsXSecond <= (others => '0');
-			else 
-				TicSec <= '0';
-				NumTicsXSecond <= NumTicsXSecond +1;
-			end if;
-		end if;
-	end process;
-
-	PROCESS (reset_l, TicSec)
-	BEGIN
-	  IF reset_l = '0' THEN
-		cnt <= "000";
-	  elsif KEY(3) = '0' and TicSec = '1' then
-		if cnt = "111" then
-			cnt <= "000";
-		else
-			cnt <= cnt + 1;
-		end if;
-	  end if ;
-	END PROCESS;
-
 	--------------------------7Segmentos
 	 hex5_7: hex_7seg
      port map(	
