@@ -31,13 +31,14 @@ begin
 
 -- UC
     --Salida
+    pulsado <= pulsado_out;
 
     --Salida UP
     ld_cod     <= '1' when EP = E_INICIO and make = '1' else '0';
     pulsado_in <= '1' when EP = E_INICIO and make = '1' else '0';
     ld_pulsado <= '1' when (EP = E_INICIO and make = '1') or (EP = E_COMPROBAR_TECLA and cod_eq_cod2 = '1') else '0';
     ld_cod2    <= '1' when EP = E_ESPERA_BREAK and break = '1' else '0';
-    pulsado <= pulsado_out;
+
     est_pr : process( clk, reset_l )
     begin
         if reset_l = '0' then
