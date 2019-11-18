@@ -6,7 +6,7 @@ entity tec_control_pulsado_tb is
 end tec_control_pulsado_tb ; 
 
 architecture arch1 of tec_control_pulsado_tb is
-    signal clk : std_logic := '1'; 
+    signal clk : std_logic := '0'; 
     constant PERIOD_CLK : time := 20 ns;
     constant HALF_PERIOD_CLK : time := PERIOD_CLK/2;
     
