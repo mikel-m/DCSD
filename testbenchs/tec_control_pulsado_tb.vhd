@@ -59,7 +59,7 @@ begin
     begin
         wait for 2 ns;
         wait for PERIOD_CLK_PS2;
-        codigo <= X"0D";
+        codigo <= X"23";
         make <= '1';
         wait for HALF_PERIOD_CLK;
         make <= '0';
@@ -74,7 +74,7 @@ begin
         wait for HALF_PERIOD_CLK;
         make <= '0';
         wait for PERIOD_CLK_PS2 - HALF_PERIOD_CLK;
-        codigo <= X"0D";
+        codigo <= X"23";
         break <= '1';
         wait for HALF_PERIOD_CLK;
         break <= '0';
