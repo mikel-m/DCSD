@@ -101,7 +101,7 @@ begin
     end process ;
 
 -- UP
-    r_codigo_in <= ps2_dat & r_codigo_out(6 downto 0);
+    r_codigo_in <= ps2_dat & r_codigo_out(7 downto 1);
     -- Unidades Combinacionales
    
     -- Unidades Secuenciales
@@ -110,7 +110,11 @@ begin
         if reset_l = '0' then
             clk_ps2_prev <= '0';
         elsif rising_edge(clk) then
-            clk_ps2_prev <= ps2_clk;
+            if(ps2_clk = '1') then
+                clk_ps2_prev <= '1';
+            else
+              clk_ps2_prev <= '0';
+            end if;
         end if;
     end process ; 
     clk_ps2_ch_down <= (ps2_clk xor clk_ps2_prev) and clk_ps2_prev;
@@ -132,11 +136,18 @@ begin
     begin
         if reset_l = '0' then
             cont <= to_unsigned(0,4);
+            cont_eq_8 <= '0';
         elsif rising_edge(clk) then
             if clr_cont = '1' then
                 cont <= to_unsigned(0,4);
             elsif cont_plus = '1' then
                 cont <= cont + 1;
+            end if ;
+
+            if cont = X"7" then
+                cont_eq_8 <= '1';
+            else
+                cont_eq_8 <= '0';
             end if ;
         end if ;
     end process ; -- count_8
@@ -144,7 +155,7 @@ begin
     r_par : process( clk,reset_l )
     begin
         if reset_l = '0' then
-            par <= '0';
+            par <= '1';
         elsif rising_edge(clk) then
             if ld_par = '1' then
                 par <= not par;
