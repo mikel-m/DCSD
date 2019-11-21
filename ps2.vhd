@@ -198,7 +198,7 @@ begin
   
   r_0 : process( clk, reset_l )
   begin
-    if reset_l = '1' then
+    if reset_l = '0' then
       r_out_0 <= B"0000_0000";
     elsif rising_edge(clk) then
         if ld_r_0 = '1' then
