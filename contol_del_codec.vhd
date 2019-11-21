@@ -12,8 +12,8 @@ entity control_del_codec is
     bclk    : in std_logic;
     daclrc  : in std_logic;
     dacdat  : out std_logic;
-    i2c_sclk: out std_logic;
-    i2c_sdat: out std_logic;
+    i2c_sclk: inout std_logic;
+    i2c_sdat: inout std_logic;
     xck     : out std_logic
   ) ;
 end control_del_codec ; 
@@ -108,7 +108,7 @@ begin
       enable  => enable
     );
 
-    sin_dds_comp : syn_dds
+    sin_dds_comp : sin_dds
     port map(	
         clk_50      => clk,
         reset       => reset,

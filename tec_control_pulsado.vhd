@@ -9,7 +9,7 @@ entity tec_control_pulsado is
     make    : in std_logic;
     break   : in std_logic;
     codigo  : in std_logic_vector(7 downto 0);
-    tecla   : out std_logic_vector(3 downto 0);
+    tecla   : out std_logic_vector(2 downto 0);
     pulsado : out std_logic
   ) ;
 end tec_control_pulsado ; 
@@ -116,4 +116,20 @@ begin
     --  
     --   end if ;
     -- end process ;
+
+      tecla_case : process (cod)
+      begin
+        case cod is
+            when X"1C" => tecla <= "000";
+            when X"1B" => tecla <= "001";
+            when X"23" => tecla <= "010";
+            when X"2B" => tecla <= "011";
+            when X"34" => tecla <= "100";
+            when X"33" => tecla <= "101";
+            when X"3B" => tecla <= "110";
+            when X"1A" => tecla <= "111";
+            when others => tecla <= "000";
+        end case;
+      end process;  
+
 end architecture ;

@@ -55,7 +55,7 @@ architecture arch1 of control_del_teclado is
           make    : in std_logic;
           break   : in std_logic;
           codigo  : in std_logic_vector(7 downto 0);
-          tecla   : out std_logic_vector(3 downto 0);
+          tecla   : out std_logic_vector(2 downto 0);
           pulsado : out std_logic
         ) ;
       end component ; 
@@ -103,7 +103,7 @@ begin
         ) ;
 
     control_pulsado_comp : tec_control_pulsado
-        port (
+        port map (
             clk     => clk,
             reset_l => reset_l,
             make    => make,
@@ -112,6 +112,4 @@ begin
             tecla   => tecla,
             pulsado => pulsado
         ) ;
-
-        
 end architecture ;
