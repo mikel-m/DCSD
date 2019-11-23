@@ -58,7 +58,7 @@ entity DE1SOC_xxx is
 --	IRDA_TXD	: out	std_logic;
 	-- PS2 ----------------
 	PS2_CLK		: in	std_logic;
---	PS2_CLK2		: in	std_logic;
+--	PS2_CLK2	: in	std_logic;
 	PS2_DAT		: inout	std_logic
 --	PS2_DAT2		: inout	std_logic;
 	-- Video-In ----------------
@@ -144,7 +144,7 @@ architecture rtl_0 of DE1SOC_xxx is
 		"0001", --14
 		"0001"  --15
 		);
-		constant rom_vol_1 : rom2 := (
+	constant rom_vol_1 : rom2 := (
 		"0000", --00
 		"0001", --01
 		"0010", --02
@@ -192,6 +192,7 @@ architecture rtl_0 of DE1SOC_xxx is
 			ps2_clk : in std_logic;
 			ps2_dat : in std_logic;
 			pulsado : out std_logic;
+			cod_k   : out std_logic_vector(7 downto 0);
 			tecla   : out std_logic_vector(2 downto 0)
 		) ;
 	end component ; 
@@ -220,13 +221,34 @@ architecture rtl_0 of DE1SOC_xxx is
 	signal nota : std_logic_vector(2 downto 0);
 	signal freq: std_logic_vector(11 downto 0);
 	signal tecla : std_logic_vector(2 downto 0);
+
+	signal clk_div : std_logic;
+	component div_freq is
+		port (
+		  clk: in std_logic;
+		  reset_l : in std_logic;
+		  clk_div : out std_logic
+		) ;
+	end component ; 
+
+	signal cod_k   : std_logic_vector(7 downto 0);
+	
 begin 
+
+	df : div_freq
+	port  map(
+	  clk => clk,
+	  reset_l => reset_l,
+	  clk_div => clk_div
+	) ;
+
 	--  Input PINs Asignements
     clk <= CLOCK_50; 
 	reset_l <= KEY(0);
 	
 	-- Output PINs Asignements
-	LEDR <= freq(9 downto 0);	
+	--LEDR <= freq(9 downto 0);	
+	LEDR <= (2 => tecla(2), 1 => tecla(1), 0 => tecla(0), others => pulsado);	
 	leds <= cnt;
 	my_keys_limpio <= KEY;
 	sw_l <= SW;
@@ -239,6 +261,7 @@ begin
 		ps2_clk => PS2_CLK,
 		ps2_dat => PS2_DAT,
 		pulsado => pulsado,
+		cod_k => cod_k,
 		tecla   => nota
 	) ;
 	
@@ -294,21 +317,25 @@ begin
 	--     dig => HEX3
 	-- 	);
 
-	-- hex1_7: hex_7seg 
-	-- port map(	
-	-- 	hex => rom_vol_0(to_integer(SW(3) & SW(2) & SW(1) & SW(0))),
-	-- 	dig => HEX1
-	-- 	);
-	-- hex0_7: hex_7seg 
-	-- port map(	
-	-- 	hex => rom_vol_1(to_integer(SW(3) & SW(2) & SW(1) & SW(0))),
-	-- 	dig => HEX0
-	-- 	);
+	hex1_7: hex_7seg 
+	port map(	
+		hex => rom_vol_0(to_integer(SW(3) & SW(2) & SW(1) & SW(0))),
+		dig => HEX1
+		);
+	hex0_7: hex_7seg 
+	port map(	
+		hex => rom_vol_1(to_integer(SW(3) & SW(2) & SW(1) & SW(0))),
+		dig => HEX0
+		);
 
 	hex5_7: hex_7seg
       port map(	
-	     hex => "0" & tecla,
+	     hex => cod_k(7 downto 4),
 	     dig => HEX5
-          );
-
+		  );
+	hex4_7: hex_7seg
+	port map(	
+		hex => cod_k(3 downto 0),
+		dig => HEX4
+		);
 END rtl_0;
