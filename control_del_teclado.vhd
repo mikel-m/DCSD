@@ -9,6 +9,7 @@ entity control_del_teclado is
         ps2_clk : in std_logic;
         ps2_dat : in std_logic;
         pulsado : out std_logic;
+        cod_k   : out std_logic_vector(7 downto 0);
         tecla   : out std_logic_vector(2 downto 0)
     ) ;
 end control_del_teclado ; 
@@ -101,7 +102,7 @@ begin
             make       => make,
             break      => break
         ) ;
-
+    cod_k <= codigo_out;
     control_pulsado_comp : tec_control_pulsado
         port map (
             clk     => clk,
