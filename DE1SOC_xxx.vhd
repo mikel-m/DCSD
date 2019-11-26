@@ -49,7 +49,7 @@ entity DE1SOC_xxx is
 	-- SEG7 ----------------
 	HEX0	: out	std_logic_vector(6 downto 0);
 	HEX1	: out	std_logic_vector(6 downto 0);
---	HEX2	: out	std_logic_vector(6 downto 0);
+	--HEX2	: out	std_logic_vector(6 downto 0);
 	HEX3	: out	std_logic_vector(6 downto 0);
 	HEX4	: out	std_logic_vector(6 downto 0);
 	HEX5	: out	std_logic_vector(6 downto 0);
@@ -220,7 +220,6 @@ architecture rtl_0 of DE1SOC_xxx is
 	signal pulsado: std_logic;
 	signal nota : std_logic_vector(2 downto 0);
 	signal freq: std_logic_vector(11 downto 0);
-	signal tecla : std_logic_vector(2 downto 0);
 
 	signal clk_div : std_logic;
 	component div_freq is
@@ -248,7 +247,7 @@ begin
 	
 	-- Output PINs Asignements
 	--LEDR <= freq(9 downto 0);	
-	LEDR <= (2 => tecla(2), 1 => tecla(1), 0 => tecla(0), others => pulsado);	
+	LEDR <= (2 => nota(2), 1 => nota(1), 0 => nota(0), others => pulsado);	
 	leds <= cnt;
 	my_keys_limpio <= KEY;
 	sw_l <= SW;
@@ -332,6 +331,11 @@ begin
       port map(	
 	     hex => cod_k(7 downto 4),
 	     dig => HEX5
+		  );
+	hex3_7: hex_7seg
+      port map(	
+	     hex => "0" & nota(2 downto 0),
+	     dig => HEX3
 		  );
 	hex4_7: hex_7seg
 	port map(	
