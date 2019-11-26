@@ -27,7 +27,7 @@ entity DE1SOC_xxx is
 	-- CODEC Audio ----------------
 	AUD_ADCDAT	: in	std_logic;
 	AUD_ADCLRCK	: in	std_logic;
-	AUD_BCLK		: in	std_logic;
+	AUD_BCLK	: in	std_logic;
 	AUD_DACDAT	: out	std_logic;
 	AUD_DACLRCK	: in	std_logic;
 	AUD_XCK		: out	std_logic;
@@ -238,8 +238,18 @@ architecture rtl_0 of DE1SOC_xxx is
 			dig	: out	std_logic_vector(6 downto 0)
 		);
 	end component;
+	component control_nota is
+		port (
+		  clk     : in std_logic;
+		  reset_l : in std_logic;
+		  pulsado    : in std_logic;
+		  nota : in std_logic_vector(2 downto 0);
+		  freq: out std_logic_vector(11 downto 0);
+		  enable  : out std_logic
+		) ;
+	  end component ; 
+	  signal enable: std_logic;
 
-	
 begin 
 	--  Input PINs Asignements
     clk <= CLOCK_50;
@@ -282,50 +292,23 @@ begin
         freq        => freq, -- frecuencia en hz (entero, sin decimales)
         voldec      => vol, -- nivel de reducción de volumen (0 a 15)
         nextsample  => siguiente_muestra,
-        enable      => SW(9),
+        enable      => enable,
         sample      => muestra
         );
-    
-
-	freq <= rom_notes(to_integer(SW(8) & SW(7) & SW(6)));
 	
-	
-	limpiar_senales : process (clk)
-	begin
-		my_keys <= KEY;
-	end process; -- limpiar_senales
-	
-	-- Registro contador de TICs de clk 
-	-- (activa TicSec cada segundo durante 1 ciclo de clk)
-	process (clk, reset_l)
-	begin
-		if reset_l = '0' then
-			NumTicsXSecond <= (others => '0');
-			TicSec <= '0';
-		elsif clk'event and clk = '1' then
-			if (NumTicsXSecond = (TICS_PER_SECOND-1) ) then
-				TicSec <= '1';
-				NumTicsXSecond <= (others => '0');
-			else 
-				TicSec <= '0';
-				NumTicsXSecond <= NumTicsXSecond +1;
-			end if;
-		end if;
-	end process;
+	cnt_nota : control_nota
+		port map (
+		  clk => clk,
+		  reset_l => reset_l,
+		  pulsado => SW(9),
+		  nota => "010",
+		  freq => freq,
+		  enable => enable
+		) ;
 
-	PROCESS (reset_l, TicSec)
-	BEGIN
-	  IF reset_l = '0' THEN
-		cnt <= "000";
-	  elsif KEY(3) = '0' and TicSec = '1' then
-		if cnt = "111" then
-			cnt <= "000";
-		else
-			cnt <= cnt + 1;
-		end if;
-	  end if ;
-	END PROCESS;
 
+	--freq <= rom_notes(to_integer(SW(8) & SW(7) & SW(6)));
+	
 	--------------------------7Segmentos
 	 hex5_7: hex_7seg
      port map(	
