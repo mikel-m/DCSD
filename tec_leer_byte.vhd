@@ -46,7 +46,7 @@ begin
     ld_par     <= '1' when EP = E_CARGAR_BIT and ps2_dat = '1' else '0';
     ld_codigo  <= '1' when EP = E_CARGAR_BIT                   else '0';
     cont_plus  <= '1' when EP = E_CARGAR_BIT                   else '0';
-    ld_dat_par <= '1' when EP = E_ESPERA_3                     else '0';
+    ld_dat_par <= '1' when EP = E_ESPERA_1 and clk_ps2_ch_down ='1' else '0';
 
     est_pr : process( clk, reset_l )
     begin
@@ -88,7 +88,7 @@ begin
                                 end if;
         when E_ESPERA_3     =>  if dat_par=par then
                                     ES <= E_ESPERAR_STOP;
-                                elsif dat_par=par then
+                                else
                                     ES <= E_INICIO;
                                 end if;
         when E_ESPERAR_STOP =>  if clk_ps2_ch_down ='0' then

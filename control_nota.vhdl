@@ -8,7 +8,7 @@ entity control_nota is
     clk     : in std_logic;
     reset_l : in std_logic;
     pulsado    : in std_logic;
-    nota : in std_logic_vector(2 downto 0);
+    nota : in std_logic_vector(3 downto 0);
     freq: out std_logic_vector(11 downto 0);
     enable  : out std_logic
   ) ;
@@ -28,7 +28,7 @@ SIGNAL EP, ES	: estado;
 -- Cargar la nota de la rom
   signal ld_dat  : std_logic;
   
-  signal rom_in : std_logic_vector(2 downto 0);
+  signal rom_in : std_logic_vector(3 downto 0);
   signal rom_freq: std_logic_vector(11 downto 0);
   
 begin
@@ -48,14 +48,14 @@ begin
     case EP is
       when E_INICIO =>  if (pulsado_ch_up = '0') then --Inicio --> Inicio
                           ES <= E_INICIO;
-                        elsif pulsado_ch_up = '1' then --Inicio --> Carga direccion
+                        else --Inicio --> Carga direccion
                           ES <= E_CARGAR_DIR;
                         end if ;  
       when E_CARGAR_DIR =>  ES <= E_CARGAR_FREQ; --Carga direccion--> Cargar frecuencia
       when E_CARGAR_FREQ =>  ES <= E_ENVIAR_FREQ; --Contar frecuencia --> enviar frecuencia
       when E_ENVIAR_FREQ =>  if pulsado_ch_down = '0' then --enviar frecuencia --> enviar frecuencia
                           ES <= E_ENVIAR_FREQ;
-                        elsif pulsado_ch_down = '1' then --enviar frecuencia --> Inicio
+                        else --enviar frecuencia --> Inicio
                           ES <= E_INICIO;
                         end if;
     end case ;
@@ -100,7 +100,7 @@ begin
   R_DAT : process (clk, reset_l)
   begin
     if reset_l = '0' then
-      rom_in <=  "000";
+      rom_in <=  X"0";
     elsif rising_edge(clk) then
       if ld_dir = '1' then
         rom_in <= nota;

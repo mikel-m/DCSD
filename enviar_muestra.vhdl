@@ -64,19 +64,19 @@ begin
                           ES <= E_INICIO;
                         elsif daclrc_ch = '1' and bclk_ch_down = '1' and DACLRC = '1' then --Inicio --> Carga
                           ES <= E_CARGAR;
-                        elsif daclrc_ch = '1' and bclk_ch_down = '1' and DACLRC = '0' then --Inicio --> Contar
+                        else --Inicio --> Contar
                           ES <= E_CONTAR;
                         end if ;  
       when E_CARGAR =>  ES <= E_CONTAR; --Carga --> Contar
       when E_CONTAR =>  ES <= E_ESPERA; --Contar --> Espera
-      when E_ESPERA =>  if ES = E_ESPERA and bclk_ch_down = '0' then --Espera --> Espera
+      when E_ESPERA =>  if bclk_ch_down = '0' then --Espera --> Espera
                           ES <= E_ESPERA;
-                        elsif bclk_ch_down = '1' then --Espera --> Shift
+                        else--Espera --> Shift
                           ES <= E_SHIFT;
                         end if;
       when E_SHIFT =>   if cont_eq_16 = '0' then --Shift --> Contar
                           ES <= E_CONTAR;
-                        elsif cont_eq_16 = '1' then --Shift --> Inicio
+                        else --Shift --> Inicio
                             ES <= E_INICIO;
                         end if ;
     end case ;

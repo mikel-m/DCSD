@@ -49,7 +49,7 @@ entity DE1SOC_xxx is
 	-- SEG7 ----------------
 	HEX0	: out	std_logic_vector(6 downto 0);
 	HEX1	: out	std_logic_vector(6 downto 0);
-	--HEX2	: out	std_logic_vector(6 downto 0);
+	HEX2	: out	std_logic_vector(6 downto 0);
 	HEX3	: out	std_logic_vector(6 downto 0);
 	HEX4	: out	std_logic_vector(6 downto 0);
 	HEX5	: out	std_logic_vector(6 downto 0);
@@ -174,12 +174,13 @@ architecture rtl_0 of DE1SOC_xxx is
 		  clk     : in std_logic;
 		  reset_l : in std_logic;
 		  pulsado : in std_logic;
-		  nota    : in std_logic_vector(2 downto 0);
+		  nota    : in std_logic_vector(3 downto 0);
 		  vol     : in std_logic_vector(3 downto 0);
 		  bclk    : in std_logic;
 		  daclrc  : in std_logic;
 		  dacdat  : out std_logic;
 		  i2c_sclk: out std_logic;
+		  freq2 : out std_logic_vector(11 downto 0) ;
 		  i2c_sdat: out std_logic;
 		  xck     : out std_logic
 		) ;
@@ -193,7 +194,7 @@ architecture rtl_0 of DE1SOC_xxx is
 			ps2_dat : in std_logic;
 			pulsado : out std_logic;
 			cod_k   : out std_logic_vector(7 downto 0);
-			tecla   : out std_logic_vector(2 downto 0)
+			tecla   : out std_logic_vector(3 downto 0)
 		) ;
 	end component ; 
 	
@@ -218,9 +219,9 @@ architecture rtl_0 of DE1SOC_xxx is
 	signal sw_2: std_logic_vector(9 downto 0);
 	signal sw_l: std_logic_vector(9 downto 0);
 	signal pulsado: std_logic;
-	signal nota : std_logic_vector(2 downto 0);
+	signal nota : std_logic_vector(3 downto 0);
 	signal freq: std_logic_vector(11 downto 0);
-
+	
 	signal clk_div : std_logic;
 	component div_freq is
 		port (
@@ -244,11 +245,10 @@ begin
 	--  Input PINs Asignements
     clk <= CLOCK_50; 
 	reset_l <= KEY(0);
-	
+	LEDR(0) <= pulsado;
+
 	-- Output PINs Asignements
 	--LEDR <= freq(9 downto 0);	
-	LEDR <= (2 => nota(2), 1 => nota(1), 0 => nota(0), others => pulsado);	
-	leds <= cnt;
 	my_keys_limpio <= KEY;
 	sw_l <= SW;
 	vol <= sw_l(3) & sw_l(2) & sw_l(1) & sw_l(0);
@@ -271,6 +271,7 @@ begin
 		  pulsado  => pulsado,
 		  nota     => nota,
 		  vol      => vol,
+		  freq2 => freq,
 		  bclk     => AUD_BCLK,
 		  daclrc   => AUD_ADCLRCK,
 		  dacdat   => AUD_DACDAT,
@@ -329,17 +330,23 @@ begin
 
 	hex5_7: hex_7seg
       port map(	
-	     hex => cod_k(7 downto 4),
+	     hex => freq(11 downto 8),
 	     dig => HEX5
-		  );
-	hex3_7: hex_7seg
-      port map(	
-	     hex => "0" & nota(2 downto 0),
-	     dig => HEX3
 		  );
 	hex4_7: hex_7seg
 	port map(	
-		hex => cod_k(3 downto 0),
+		hex => freq(7 downto 4),
 		dig => HEX4
 		);
+	hex3_7: hex_7seg
+      port map(	
+	     hex => freq(3 downto 0),
+	     dig => HEX3
+		  );
+	hex2_2: hex_7seg
+	port map(	
+		hex => nota,
+		dig => HEX2
+		);
+	
 END rtl_0;

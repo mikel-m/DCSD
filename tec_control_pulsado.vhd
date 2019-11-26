@@ -9,7 +9,8 @@ entity tec_control_pulsado is
     make    : in std_logic;
     break   : in std_logic;
     codigo  : in std_logic_vector(7 downto 0);
-    tecla   : out std_logic_vector(2 downto 0);
+    codigo2 : out std_logic_vector(7 downto 0);
+    tecla   : out std_logic_vector(3 downto 0);
     pulsado : out std_logic
   ) ;
 end tec_control_pulsado ; 
@@ -27,12 +28,28 @@ architecture arch1 of tec_control_pulsado is
     signal pulsado_out : std_logic;
     signal pulsado_in  : std_logic;
 
+    constant K_A : std_logic_vector(7 downto 0):= X"1C";
+    constant K_S : std_logic_vector(7 downto 0):= X"1B";
+    constant K_D : std_logic_vector(7 downto 0):= X"23";
+    constant K_F : std_logic_vector(7 downto 0):= X"2B";
+    constant K_G : std_logic_vector(7 downto 0):= X"34";
+    constant K_H : std_logic_vector(7 downto 0):= X"33";
+    constant K_J : std_logic_vector(7 downto 0):= X"3B";
+    
+    constant K_X : std_logic_vector(7 downto 0):= X"22";
+    constant K_C : std_logic_vector(7 downto 0):= X"21";
+    constant K_Z : std_logic_vector(7 downto 0):= X"1A";
+    constant K_V : std_logic_vector(7 downto 0):= X"2A";
+    constant K_B : std_logic_vector(7 downto 0):= X"32";
+    constant K_N : std_logic_vector(7 downto 0):= X"31";
+    constant K_M : std_logic_vector(7 downto 0):= X"3A";
+
 begin
 
 -- UC
     --Salida
     pulsado <= pulsado_out;
-
+    codigo2 <= cod;
     --Salida UP
     ld_cod     <= '1' when EP = E_INICIO and make = '1' else '0';
     pulsado_in <= '1' when EP = E_INICIO and make = '1' else '0';
@@ -120,15 +137,23 @@ begin
       tecla_case : process (cod)
       begin
         case cod is
-            when X"1C" => tecla <= "000";
-            when X"1B" => tecla <= "001";
-            when X"23" => tecla <= "010";
-            when X"2B" => tecla <= "011";
-            when X"34" => tecla <= "100";
-            when X"33" => tecla <= "101";
-            when X"3B" => tecla <= "110";
-            when X"1A" => tecla <= "111";
-            when others => tecla <= "000";
+            when K_A => tecla <= X"0";
+            when K_S => tecla <= X"1";
+            when K_D => tecla <= X"2";
+            when K_F => tecla <= X"3";
+            when K_G => tecla <= X"4";
+            when K_H => tecla <= X"5";
+            when K_J => tecla <= X"6";
+            
+            when K_Z => tecla <= X"7";
+            when K_X => tecla <= X"8";
+            when K_C => tecla <= X"9";
+            when K_V => tecla <= X"A";
+            when K_B => tecla <= X"B";
+            when K_N => tecla <= X"C";
+            when K_M => tecla <= X"D";
+
+            when others => tecla <= X"0";
         end case;
       end process;  
 

@@ -8,7 +8,7 @@ end tec_leer_byte_tb ;
 architecture arch1 of tec_leer_byte_tb is
     signal reset_l : std_logic := '0'; 
     signal clk : std_logic := '1'; 
-    signal ps2_clk : std_logic := '1'; 
+    signal ps2_clk : std_logic := '0'; 
     constant PERIOD_CLK : time := 20 ns;
     constant HALF_PERIOD_CLK : time := PERIOD_CLK/2;
     constant PERIOD_CLK_PS2 : time := 70 us;
@@ -37,9 +37,9 @@ architecture arch1 of tec_leer_byte_tb is
         ps2_clock : process
         begin
             wait for 1 ns;
-            ps2_clk <= '0';
-            wait for HALF_PERIOD_CLK_PS2 - (1 ns);
             ps2_clk <= '1';
+            wait for HALF_PERIOD_CLK_PS2 - (1 ns);
+            ps2_clk <= '0';
             wait for HALF_PERIOD_CLK_PS2;
         end process ;
 
@@ -84,10 +84,33 @@ architecture arch1 of tec_leer_byte_tb is
             wait for PERIOD_CLK_PS2;
             ps2_dat <= '1';--7
             wait for PERIOD_CLK_PS2;
-            ps2_dat <= '1'; --8
+            ps2_dat <= '1'; --PAR
             wait for PERIOD_CLK_PS2;
             --Stop
             ps2_dat <= '1';
+            wait for PERIOD_CLK_PS2*3;
+            ps2_dat <= '0';--Start 0x23
+            wait for PERIOD_CLK_PS2;
+            ps2_dat <= '1'; --0
+            wait for PERIOD_CLK_PS2;
+            ps2_dat <= '1'; --1
+            wait for PERIOD_CLK_PS2;
+            ps2_dat <= '0'; --2
+            wait for PERIOD_CLK_PS2;
+            ps2_dat <= '0'; --3
+            wait for PERIOD_CLK_PS2;
+            ps2_dat <= '0'; --4
+            wait for PERIOD_CLK_PS2;
+            ps2_dat <= '1'; --5
+            wait for PERIOD_CLK_PS2;
+            ps2_dat <= '0'; --6
+            wait for PERIOD_CLK_PS2;
+            ps2_dat <= '0';--7
+            wait for PERIOD_CLK_PS2;
+            ps2_dat <= '0'; --PAR
+            wait for PERIOD_CLK_PS2; 
+            ps2_dat <= '1'; --Stop 0x23
+            wait for PERIOD_CLK_PS2;
             wait;
           end process; -- estimulos
           

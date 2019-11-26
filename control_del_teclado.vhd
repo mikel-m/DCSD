@@ -10,7 +10,7 @@ entity control_del_teclado is
         ps2_dat : in std_logic;
         pulsado : out std_logic;
         cod_k   : out std_logic_vector(7 downto 0);
-        tecla   : out std_logic_vector(2 downto 0)
+        tecla   : out std_logic_vector(3 downto 0)
     ) ;
 end control_del_teclado ; 
 
@@ -56,7 +56,8 @@ architecture arch1 of control_del_teclado is
           make    : in std_logic;
           break   : in std_logic;
           codigo  : in std_logic_vector(7 downto 0);
-          tecla   : out std_logic_vector(2 downto 0);
+          codigo2 : out std_logic_vector(7 downto 0);
+          tecla   : out std_logic_vector(3 downto 0);
           pulsado : out std_logic
         ) ;
       end component ; 
@@ -102,10 +103,10 @@ begin
             make       => make,
             break      => break
         ) ;
-    cod_k <= codigo_out;
     control_pulsado_comp : tec_control_pulsado
         port map (
             clk     => clk,
+            codigo2 => cod_k,
             reset_l => reset_l,
             make    => make,
             break   => break,

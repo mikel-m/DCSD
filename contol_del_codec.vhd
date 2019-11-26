@@ -7,13 +7,14 @@ entity control_del_codec is
     clk     : in std_logic;
     reset_l : in std_logic;
     pulsado : in std_logic;
-    nota    : in std_logic_vector(2 downto 0);
+    nota    : in std_logic_vector(3 downto 0);
     vol     : in std_logic_vector(3 downto 0);
     bclk    : in std_logic;
     daclrc  : in std_logic;
     dacdat  : out std_logic;
     i2c_sclk: inout std_logic;
     i2c_sdat: inout std_logic;
+    freq2   : out std_logic_vector(11 downto 0) ;
     xck     : out std_logic
   ) ;
 end control_del_codec ; 
@@ -36,7 +37,7 @@ architecture arch1 of control_del_codec is
             clk     : in std_logic;
             reset_l : in std_logic;
             pulsado : in std_logic;
-            nota    : in std_logic_vector(2 downto 0);
+            nota    : in std_logic_vector(3 downto 0);
             freq    : out std_logic_vector(11 downto 0);
             enable  : out std_logic
         ) ;
@@ -76,7 +77,7 @@ architecture arch1 of control_del_codec is
 begin
     mic_lin <= '0';
     reset <= not reset_l;
-
+    freq2 <= freq;
     env_mues_comp : enviar_muestra
     port map ( 
         clk => clk,
