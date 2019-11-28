@@ -30,15 +30,17 @@ begin
       ps2_clk_hist <= ps2_clk & ps2_clk_hist(7 downto 1);
       ps2_dat_hist <= ps2_dat & ps2_dat_hist(7 downto 1);
       
-      if ps2_clk_hist = X"FF" then
+      if ps2_clk_hist = X"FF" and ps2_dat_hist = X"FF" then
         ps2_clk_limpio <= '1';
-      elsif ps2_clk_hist = X"00" then
-        ps2_clk_limpio <= '0';
-      end if ;
-
-      if ps2_dat_hist = X"FF" then
         ps2_dat_limpio <= '1';
-      elsif ps2_dat_hist = X"00" then
+      elsif ps2_clk_hist = X"FF"  and ps2_dat_hist = X"00" then
+        ps2_clk_limpio <= '1';
+        ps2_dat_limpio <= '0';
+      elsif ps2_clk_hist = X"00"  and ps2_dat_hist = X"FF" then
+        ps2_clk_limpio <= '0';
+        ps2_dat_limpio <= '1';
+      elsif ps2_clk_hist = X"00"  and ps2_dat_hist = X"00" then
+        ps2_clk_limpio <= '0';
         ps2_dat_limpio <= '0';
       end if ;
     end if ;

@@ -25,8 +25,8 @@ entity DE1SOC_xxx is
 --	ADC_DOUT		: in	std_logic;
 --	ADC_SCLK		: out	std_logic;
 	-- CODEC Audio ----------------
-	AUD_ADCDAT	: in	std_logic;
-	AUD_ADCLRCK	: in	std_logic;
+	---AUD_ADCDAT	: in	std_logic;
+	--AUD_ADCLRCK	: in	std_logic;
 	AUD_BCLK		: in	std_logic;
 	AUD_DACDAT	: out	std_logic;
 	AUD_DACLRCK	: in	std_logic;
@@ -181,7 +181,7 @@ architecture rtl_0 of DE1SOC_xxx is
 		  dacdat  : out std_logic;
 		  i2c_sclk: out std_logic;
 		  freq2 : out std_logic_vector(11 downto 0) ;
-		  i2c_sdat: out std_logic;
+		  i2c_sdat: inout std_logic;
 		  xck     : out std_logic
 		) ;
 	  end component ; 
@@ -271,9 +271,9 @@ begin
 		  pulsado  => pulsado,
 		  nota     => nota,
 		  vol      => vol,
-		  freq2 => freq,
+		  freq2	   => freq,
 		  bclk     => AUD_BCLK,
-		  daclrc   => AUD_ADCLRCK,
+		  daclrc   => AUD_DACLRCK,
 		  dacdat   => AUD_DACDAT,
 		  i2c_sclk => FPGA_I2C_SCLK,
 		  i2c_sdat => FPGA_I2C_SDAT,
