@@ -97,8 +97,10 @@ begin
         
         when E_ESPERAR_STOP =>  if clk_ps2_ch_down ='0' then
                                     ES <= E_ESPERAR_STOP;
+                                elsif clk_ps2_ch_down ='1' and r_codigo_out=X"E0" then
+                                    ES <= E_INICIO;
                                 else
-                                    ES <= E_LECTURA_TERMINADA;
+                                    ES <= E_LECTURA_TERMINADA;  
                                 end if;
         when E_LECTURA_TERMINADA => ES <= E_INICIO;
         end case ;
