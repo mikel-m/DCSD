@@ -61,6 +61,15 @@ architecture arch of tec_gestor_tecla is
     constant SEL_VOL  : std_logic_vector(1 downto 0) := "10" ;
     constant SEL_MEL  : std_logic_vector(1 downto 0) := "11" ;
 begin
+    --Salida UP
+    ld_modo     <=  '1' when EP = E_INICIO and pulsado_ch_down = '1'  else 0;
+    ld nota     <=  '1' when EP = E_ESPERA and modo = "01"            else 0;
+    ld_mel      <=  '1' when EP = E_ESPERA and modo = "11"            else 0;
+    enable      <=  '1' when EP = E_ENABLE_NOTA                       else 0;
+    vol_plus    <=  '1' when EP = E_SUBIR_VOL                         else 0;
+    vol_minus   <=  '1' when EP = E_BAJAR_VOL                         else 0;
+    sel_salida  <=  '1' when EP = E_ENABLE_MEL                        else 0;
+
     maquina_de_estados: process (EP, codigo2, pulsado)
     begin
       case EP is
