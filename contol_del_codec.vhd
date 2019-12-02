@@ -4,18 +4,19 @@ library ieee ;
 
 entity control_del_codec is
   port (
-    clk     : in std_logic;
-    reset_l : in std_logic;
-    pulsado : in std_logic;
-    nota    : in std_logic_vector(3 downto 0);
-    vol     : in std_logic_vector(3 downto 0);
-    bclk    : in std_logic;
-    daclrc  : in std_logic;
-    dacdat  : out std_logic;
-    i2c_sclk: inout std_logic;
-    i2c_sdat: inout std_logic;
-    freq2   : out std_logic_vector(11 downto 0) ;
-    xck     : out std_logic
+    clk       : in std_logic;
+    reset_l   : in std_logic;
+    pulsado   : in std_logic;
+    nota      : in std_logic_vector(3 downto 0);
+    vol_plus  : in std_logic;
+    vol_minus : in std_logic;
+    bclk      : in std_logic;
+    daclrc    : in std_logic;
+    dacdat    : out std_logic;
+    i2c_sclk  : inout std_logic;
+    i2c_sdat  : inout std_logic;
+    freq2     : out std_logic_vector(11 downto 0) ;
+    xck       : out std_logic
   ) ;
 end control_del_codec ; 
 
@@ -66,14 +67,26 @@ architecture arch1 of control_del_codec is
     );
     end component;
 
+    component aud_control_volumen is
+        port (
+          clk : in std_logic;
+          reset_l : in std_logic;
+          vol_plus : in std_logic;
+          vol_minus : in std_logic;
+          vol : out std_logic_vector(3 downto 0)
+        ) ;
+    end component; 
+
     signal muestra: std_logic_vector(15 downto 0) ;
     signal siguiente_muestra: std_logic;
     signal mic_lin: std_logic;
 
     signal enable: std_logic;
     signal freq: std_logic_vector(11 downto 0) ;
+    signal vol : std_logic_vector(3 downto 0);
 
     signal reset: std_logic;
+
 begin
     mic_lin <= '0';
     reset <= not reset_l;
@@ -119,6 +132,13 @@ begin
         enable      => enable,
         sample      => muestra
     );
-	
+	control_volumen_comp : aud_control_volumen
+        port map (
+          clk       => clk,
+          reset_l   => reset_l,
+          vol_plus  => vol_plus,
+          vol_minus => vol_minus,
+          vol       => vol
+        ) ;
 
 end architecture ;

@@ -171,18 +171,19 @@ architecture rtl_0 of DE1SOC_xxx is
 	
 	component control_del_codec is
 		port (
-		  clk     : in std_logic;
-		  reset_l : in std_logic;
-		  pulsado : in std_logic;
-		  nota    : in std_logic_vector(3 downto 0);
-		  vol     : in std_logic_vector(3 downto 0);
-		  bclk    : in std_logic;
-		  daclrc  : in std_logic;
-		  dacdat  : out std_logic;
-		  i2c_sclk: out std_logic;
-		  freq2 : out std_logic_vector(11 downto 0) ;
-		  i2c_sdat: inout std_logic;
-		  xck     : out std_logic
+		  clk       : in std_logic;
+		  reset_l   : in std_logic;
+		  pulsado   : in std_logic;
+		  nota      : in std_logic_vector(3 downto 0);
+		  vol_plus  : in std_logic;
+    	  vol_minus : in std_logic;
+		  bclk      : in std_logic;
+		  daclrc    : in std_logic;
+		  dacdat    : out std_logic;
+		  i2c_sclk  : out std_logic;
+		  freq2     : out std_logic_vector(11 downto 0) ;
+		  i2c_sdat  : inout std_logic;
+		  xck       : out std_logic
 		) ;
 	  end component ; 
 	  
@@ -232,7 +233,8 @@ architecture rtl_0 of DE1SOC_xxx is
 	end component ; 
 
 	signal cod_k   : std_logic_vector(7 downto 0);
-	
+	signal vol_minus : std_logic;
+	signal vol_plus : std_logic;
 begin 
 
 	df : div_freq
@@ -251,7 +253,6 @@ begin
 	--LEDR <= freq(9 downto 0);	
 	my_keys_limpio <= KEY;
 	sw_l <= SW;
-	vol <= sw_l(3) & sw_l(2) & sw_l(1) & sw_l(0);
 	
 	control_del_teclado_comp	: control_del_teclado
 	port map (
@@ -266,18 +267,19 @@ begin
 	
 	control_del_codec_comp : control_del_codec
 	port map (
-		  clk      => clk,
-		  reset_l  => reset_l,
-		  pulsado  => pulsado,
-		  nota     => nota,
-		  vol      => vol,
-		  freq2	   => freq,
-		  bclk     => AUD_BCLK,
-		  daclrc   => AUD_DACLRCK,
-		  dacdat   => AUD_DACDAT,
-		  i2c_sclk => FPGA_I2C_SCLK,
-		  i2c_sdat => FPGA_I2C_SDAT,
-		  xck      => AUD_XCK
+		  clk       => clk,
+		  reset_l   => reset_l,
+		  pulsado   => pulsado,
+		  nota      => nota,
+		  vol_minus => vol_minus,
+		  vol_plus  => vol_plus
+		  freq2	    => freq,
+		  bclk      => AUD_BCLK,
+		  daclrc    => AUD_DACLRCK,
+		  dacdat    => AUD_DACDAT,
+		  i2c_sclk  => FPGA_I2C_SCLK,
+		  i2c_sdat  => FPGA_I2C_SDAT,
+		  xck       => AUD_XCK
 	) ;
 
 	limpiar_senales : process (clk, reset_l)

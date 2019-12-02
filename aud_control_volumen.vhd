@@ -52,7 +52,7 @@ begin
     r_vol : process( clk, reset_l )
     begin
         if reset_l = '0' then
-            vol <= X"0";
+            vol <= X"7";
         elsif rising_edge(clk) then
                 if vol_plus_int = '1' and vol /= X"F" then
                     vol <= vol + 1;
