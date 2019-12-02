@@ -7,7 +7,7 @@ entity  tec_gestor_tecla is
     clk     : in std_logic;
     reset_l : in std_logic;
     codigo2 : in std_logic_vector(7 downto 0);
-    pulsado : in std_logic
+    pulsado : in std_logic;
     vol_plus : out std_logic;
     vol_minus : out std_logic;
     enable : out std_logic;
@@ -19,19 +19,23 @@ entity  tec_gestor_tecla is
 end  tec_gestor_tecla; 
 
 architecture arch of tec_gestor_tecla is
-    TYPE t_estado is (E_INICIO, E_ESPERA, E_ESPERA_PULSADO, E_ENABLE_NOTA, E_SUBIR_VOL, E_BAJAR_VOL, E_ESPERA_VOL, E_ESPERA_MEL);
+    TYPE t_estado is (E_INICIO, E_ESPERA,E_ESPERA_PULSADO, E_ENABLE_NOTA, E_SUBIR_VOL, E_BAJAR_VOL, E_ESPERA_VOL, E_ENABLE_MEL);
     signal EP, ES, ESTADO: t_estado;
    
     signal nota  : std_logic_vector(3 downto 0);
     signal mel  : std_logic_vector(3 downto 0);
     signal tecla_nota  : std_logic_vector(3 downto 0);
     signal tecla_mel  : std_logic_vector(3 downto 0);
-    signal tecla_vol  : std_logic_vector(3 downto 0);
+    signal tecla_vol  : std_logic;
     signal pulsado_ch_up: std_logic;
+    signal pulsado_ch_down: std_logic;
     signal pulsado_prev: std_logic;
-    signal modo : std_logic_vector(1 downto 0) ;
-    
-    
+    signal modo : std_logic_vector(1 downto 0);
+    signal ld_mel: std_logic;
+    signal ld_nota: std_logic;
+    signal ld_modo: std_logic;
+    signal sel_salida: std_logic;
+
     constant K_A : std_logic_vector(7 downto 0):= X"1C";
     constant K_S : std_logic_vector(7 downto 0):= X"1B";
     constant K_D : std_logic_vector(7 downto 0):= X"23";
@@ -62,15 +66,15 @@ architecture arch of tec_gestor_tecla is
     constant SEL_MEL  : std_logic_vector(1 downto 0) := "11" ;
 begin
     --Salida UP
-    ld_modo     <=  '1' when EP = E_INICIO and pulsado_ch_down = '1'  else 0;
-    ld nota     <=  '1' when EP = E_ESPERA and modo = "01"            else 0;
-    ld_mel      <=  '1' when EP = E_ESPERA and modo = "11"            else 0;
-    enable      <=  '1' when EP = E_ENABLE_NOTA                       else 0;
-    vol_plus    <=  '1' when EP = E_SUBIR_VOL                         else 0;
-    vol_minus   <=  '1' when EP = E_BAJAR_VOL                         else 0;
-    sel_salida  <=  '1' when EP = E_ENABLE_MEL                        else 0;
+    ld_modo     <=  '1' when EP = E_INICIO and pulsado_ch_down = '1'  else '0';
+    ld_nota     <=  '1' when EP = E_ESPERA and modo = "01"            else '0';
+    ld_mel      <=  '1' when EP = E_ESPERA and modo = "11"            else '0';
+    enable      <=  '1' when EP = E_ENABLE_NOTA                       else '0';
+    vol_plus    <=  '1' when EP = E_SUBIR_VOL                         else '0';
+    vol_minus   <=  '1' when EP = E_BAJAR_VOL                         else '0';
+    sel_salida  <=  '1' when EP = E_ENABLE_MEL                        else '0';
 
-    maquina_de_estados: process (EP, codigo2, pulsado)
+    maquina_de_estados: process (EP, codigo2, modo, pulsado_ch_down, pulsado_ch_up, tecla_vol)
     begin
       case EP is
         when E_INICIO => if pulsado_ch_up = '1' then
@@ -115,51 +119,51 @@ begin
                --ACTIVAR LAS SEÑALES SEGÚN EL ESTADO              
       end case;
     end process; 
-    tecla_case : process (cod)
+    tecla_case : process (codigo2)
     begin
-      case cod is
+      case codigo2 is
           ------NOTAS------
           when K_A => tecla_nota <= X"0";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_S => tecla_nota <= X"1";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_D => tecla_nota <= X"2";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_F => tecla_nota <= X"3";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_G => tecla_nota <= X"4";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_H => tecla_nota <= X"5";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_J => tecla_nota <= X"6";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           
           when K_Z => tecla_nota <= X"7";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_X => tecla_nota <= X"8";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_C => tecla_nota <= X"9";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_V => tecla_nota <= X"A";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_B => tecla_nota <= X"B";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_N => tecla_nota <= X"C";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
           when K_M => tecla_nota <= X"D";
-                      sel_mode <= SEL_NOTA;
+                      modo <= SEL_NOTA;
       
           -------VOLUMEN---------
           when K_UP => tecla_vol <= '1';
-                       sel_mode <= SEL_VOL;
+                       modo <= SEL_VOL;
           when K_DOWN => tecla_vol <= '0';
-                         sel_mode <= SEL_VOL;
+                         modo <= SEL_VOL;
                         
           -------MELODIAS---------
-          when K_1 => tecla_mel <= X'0';
-                      sel_mode <= SEL_MEL;
+          when K_1 => tecla_mel <= X"0";
+                      modo <= SEL_MEL;
 
-          when others => sel_mode <= SEL_NULL;
+          when others => modo <= SEL_NULL;
       end case;
     end process;  
     -- Proceso de ejemplo para copypaste
@@ -173,18 +177,18 @@ begin
     r_nota : process( clk, reset_l )
     begin
         if reset_l = '0' then
-            nota <= X'0'
+            nota <= X"0";
         elsif rising_edge(clk) then
             if ld_nota = '1' then
                 nota <= tecla_nota;
             end if ;
-    end if ;
+      end if ;
     end process ;
 
     r_mel : process( clk, reset_l )
     begin
         if reset_l = '0' then
-            mel <= X'0'
+            mel <= X"0";
         elsif rising_edge(clk) then
             if ld_mel = '1' then
                 mel <= tecla_mel;
@@ -197,7 +201,7 @@ begin
         if reset_l = '0' then
             pulsado_prev <= '0';
         elsif rising_edge(clk) then
-            if(ps2_clk = '1') then
+            if(pulsado = '1') then
                 pulsado_prev <= '1';
             else
               pulsado_prev <= '0';
@@ -205,6 +209,7 @@ begin
         end if;
     end process ; 
     pulsado_ch_up <= ( pulsado_prev xor pulsado) and pulsado;
-    
+    pulsado_ch_down <= (pulsado_prev xor pulsado) and pulsado_prev;
+
     
 end architecture ;
