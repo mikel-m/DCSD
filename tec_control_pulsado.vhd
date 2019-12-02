@@ -10,9 +10,6 @@ entity tec_control_pulsado is
     break   : in std_logic;
     codigo  : in std_logic_vector(7 downto 0);
     codigo2 : out std_logic_vector(7 downto 0);
-    tecla_nota  : out std_logic_vector(3 downto 0);
-    tecla_mel : out std_logic;
-    tecla_vol : out std_logic;
     pulsado : out std_logic
   ) ;
 end tec_control_pulsado ; 
@@ -29,36 +26,6 @@ architecture arch1 of tec_control_pulsado is
     signal ld_pulsado  : std_logic;
     signal pulsado_out : std_logic;
     signal pulsado_in  : std_logic;
-    signal sel_mode : std_logic_vector(1 downto 0);
-    
-    constant K_A : std_logic_vector(7 downto 0):= X"1C";
-    constant K_S : std_logic_vector(7 downto 0):= X"1B";
-    constant K_D : std_logic_vector(7 downto 0):= X"23";
-    constant K_F : std_logic_vector(7 downto 0):= X"2B";
-    constant K_G : std_logic_vector(7 downto 0):= X"34";
-    constant K_H : std_logic_vector(7 downto 0):= X"33";
-    constant K_J : std_logic_vector(7 downto 0):= X"3B";
-    
-    constant K_X : std_logic_vector(7 downto 0):= X"22";
-    constant K_C : std_logic_vector(7 downto 0):= X"21";
-    constant K_Z : std_logic_vector(7 downto 0):= X"1A";
-    constant K_V : std_logic_vector(7 downto 0):= X"2A";
-    constant K_B : std_logic_vector(7 downto 0):= X"32";
-    constant K_N : std_logic_vector(7 downto 0):= X"31";
-    constant K_M : std_logic_vector(7 downto 0):= X"3A";
-   
-    constant K_UP : std_logic_vector(7 downto 0):= X"75";
-    constant K_DOWN : std_logic_vector(7 downto 0):= X"72";
-    
-    constant K_1 : std_logic_vector(7 downto 0):= X"16";
-    --constant K_2 : std_logic_vector(7 downto 0):= X"3A";
-    --constant K_3 : std_logic_vector(7 downto 0):= X"3A";
-    --constant K_4 : std_logic_vector(7 downto 0):= X"3A";
-    
-    constant SEL_NULL : std_logic_vector(1 downto 0) := "00" ;
-    constant SEL_NOTA : std_logic_vector(1 downto 0) := "01" ;
-    constant SEL_VOL  : std_logic_vector(1 downto 0) := "10" ;
-    constant SEL_MEL  : std_logic_vector(1 downto 0) := "11" ;
 
 begin
 
