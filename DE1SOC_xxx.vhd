@@ -329,16 +329,16 @@ begin
 	--     dig => HEX3
 	-- 	);
 
-	-- hex1_7: hex_7seg 
-	-- port map(	
-	-- 	hex => rom_vol_0(to_integer(vol)),
-	-- 	dig => HEX1
-	-- 	);
-	-- hex0_7: hex_7seg 
-	-- port map(	
-	-- 	hex => rom_vol_1(to_integer(vol)),
-	-- 	dig => HEX0
-	-- 	);
+	hex1_7: hex_7seg 
+	port map(	
+		hex => rom_vol_0(to_integer(unsigned(vol))),
+		dig => HEX1
+		);
+	hex0_7: hex_7seg 
+	port map(	
+		hex => rom_vol_1(to_integer(unsigned(vol))),
+		dig => HEX0
+		);
 
 	hex5_7: hex_7seg
       port map(	
