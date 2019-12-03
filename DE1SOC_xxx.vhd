@@ -87,7 +87,7 @@ architecture rtl_0 of DE1SOC_xxx is
 	
 	constant PERIOD_CLK 	: time := 20 ns;    
 	
-	signal vol     : std_logic_vector(3 downto 0) := B"0000";
+	signal vol     : std_logic_vector(3 downto 0); --:= B"0000";
 
 	
 
@@ -176,7 +176,8 @@ architecture rtl_0 of DE1SOC_xxx is
 		  pulsado   : in std_logic;
 		  nota      : in std_logic_vector(3 downto 0);
 		  vol_plus  : in std_logic;
-    	  vol_minus : in std_logic;
+		  vol_minus : in std_logic;
+		  vol_display : out std_logic_vector(3 downto 0);
 		  bclk      : in std_logic;
 		  daclrc    : in std_logic;
 		  dacdat    : out std_logic;
@@ -189,14 +190,18 @@ architecture rtl_0 of DE1SOC_xxx is
 	  
 	component control_del_teclado is
 		port (
-			clk     : in std_logic;
-			reset_l : in std_logic;
-			ps2_clk : in std_logic;
-			ps2_dat : in std_logic;
-			pulsado : out std_logic;
-			cod_k   : out std_logic_vector(7 downto 0);
-			tecla   : out std_logic_vector(3 downto 0)
-		) ;
+			clk       : in std_logic;
+			reset_l   : in std_logic;
+			ps2_clk   : in std_logic;
+			ps2_dat   : in std_logic;
+			enable    : out std_logic;
+			cod_k     : out std_logic_vector(7 downto 0);
+			nota     : out std_logic_vector(3 downto 0);
+			vol_plus  : out std_logic;
+			vol_minus : out std_logic;
+			nota_mel  : in std_logic_vector(3 downto 0);
+			enable_mel: in std_logic
+			) ;
 	end component ; 
 	
 
@@ -219,7 +224,7 @@ architecture rtl_0 of DE1SOC_xxx is
 	signal sw_1: std_logic_vector(9 downto 0);
 	signal sw_2: std_logic_vector(9 downto 0);
 	signal sw_l: std_logic_vector(9 downto 0);
-	signal pulsado: std_logic;
+	signal enable: std_logic;
 	signal nota : std_logic_vector(3 downto 0);
 	signal freq: std_logic_vector(11 downto 0);
 	
@@ -231,7 +236,7 @@ architecture rtl_0 of DE1SOC_xxx is
 		  clk_div : out std_logic
 		) ;
 	end component ; 
-
+	
 	signal cod_k   : std_logic_vector(7 downto 0);
 	signal vol_minus : std_logic;
 	signal vol_plus : std_logic;
@@ -247,7 +252,7 @@ begin
 	--  Input PINs Asignements
     clk <= CLOCK_50; 
 	reset_l <= KEY(0);
-	LEDR(0) <= pulsado;
+	LEDR(0) <= enable;
 
 	-- Output PINs Asignements
 	--LEDR <= freq(9 downto 0);	
@@ -256,30 +261,35 @@ begin
 	
 	control_del_teclado_comp	: control_del_teclado
 	port map (
-		clk     => clk,
-		reset_l => reset_l,
-		ps2_clk => PS2_CLK,
-		ps2_dat => PS2_DAT,
-		pulsado => pulsado,
-		cod_k => cod_k,
-		tecla   => nota
+		clk        => clk,
+		reset_l    => reset_l,
+		ps2_clk    => PS2_CLK,
+		ps2_dat    => PS2_DAT,
+		enable     => enable,
+		cod_k      => cod_k,
+		nota       => nota,
+		vol_plus   => vol_plus,
+		vol_minus  => vol_minus,
+		nota_mel   => X"0",
+		enable_mel => '0'
 	) ;
 	
 	control_del_codec_comp : control_del_codec
 	port map (
-		  clk       => clk,
-		  reset_l   => reset_l,
-		  pulsado   => pulsado,
-		  nota      => nota,
-		  vol_minus => vol_minus,
-		  vol_plus  => vol_plus
-		  freq2	    => freq,
-		  bclk      => AUD_BCLK,
-		  daclrc    => AUD_DACLRCK,
-		  dacdat    => AUD_DACDAT,
-		  i2c_sclk  => FPGA_I2C_SCLK,
-		  i2c_sdat  => FPGA_I2C_SDAT,
-		  xck       => AUD_XCK
+		  clk         => clk,
+		  reset_l     => reset_l,
+		  pulsado     => enable,
+		  nota        => nota,
+		  vol_minus   => vol_minus,
+		  vol_plus    => vol_plus,
+		  vol_display => vol,
+		  freq2	      => freq,
+		  bclk        => AUD_BCLK,
+		  daclrc      => AUD_DACLRCK,
+		  dacdat      => AUD_DACDAT,
+		  i2c_sclk    => FPGA_I2C_SCLK,
+		  i2c_sdat    => FPGA_I2C_SDAT,
+		  xck         => AUD_XCK
 	) ;
 
 	limpiar_senales : process (clk, reset_l)
@@ -319,16 +329,16 @@ begin
 	--     dig => HEX3
 	-- 	);
 
-	hex1_7: hex_7seg 
-	port map(	
-		hex => rom_vol_0(to_integer(SW(3) & SW(2) & SW(1) & SW(0))),
-		dig => HEX1
-		);
-	hex0_7: hex_7seg 
-	port map(	
-		hex => rom_vol_1(to_integer(SW(3) & SW(2) & SW(1) & SW(0))),
-		dig => HEX0
-		);
+	-- hex1_7: hex_7seg 
+	-- port map(	
+	-- 	hex => rom_vol_0(to_integer(vol)),
+	-- 	dig => HEX1
+	-- 	);
+	-- hex0_7: hex_7seg 
+	-- port map(	
+	-- 	hex => rom_vol_1(to_integer(vol)),
+	-- 	dig => HEX0
+	-- 	);
 
 	hex5_7: hex_7seg
       port map(	

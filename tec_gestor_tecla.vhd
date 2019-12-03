@@ -8,13 +8,12 @@ entity  tec_gestor_tecla is
     reset_l : in std_logic;
     codigo2 : in std_logic_vector(7 downto 0);
     pulsado : in std_logic;
+    nota : out std_logic_vector(3 downto 0) ;
     vol_plus : out std_logic;
     vol_minus : out std_logic;
     enable : out std_logic;
     nota_mel : in std_logic_vector(3 downto 0) ;
     enable_mel: in std_logic
-
-    
   ) ;
 end  tec_gestor_tecla; 
 
@@ -22,7 +21,7 @@ architecture arch of tec_gestor_tecla is
     TYPE t_estado is (E_INICIO, E_ESPERA,E_ESPERA_PULSADO, E_ENABLE_NOTA, E_SUBIR_VOL, E_BAJAR_VOL, E_ESPERA_VOL, E_ENABLE_MEL);
     signal EP, ES, ESTADO: t_estado;
    
-    signal nota  : std_logic_vector(3 downto 0);
+    
     signal mel  : std_logic_vector(3 downto 0);
     signal tecla_nota  : std_logic_vector(3 downto 0);
     signal tecla_mel  : std_logic_vector(3 downto 0);
@@ -35,6 +34,8 @@ architecture arch of tec_gestor_tecla is
     signal ld_nota: std_logic;
     signal ld_modo: std_logic;
     signal sel_salida: std_logic;
+    signal enable_nota: std_logic;
+    signal r_nota_out: std_logic_vector(3 downto 0);
 
     constant K_A : std_logic_vector(7 downto 0):= X"1C";
     constant K_S : std_logic_vector(7 downto 0):= X"1B";
@@ -69,7 +70,7 @@ begin
     ld_modo     <=  '1' when EP = E_INICIO and pulsado_ch_down = '1'  else '0';
     ld_nota     <=  '1' when EP = E_ESPERA and modo = "01"            else '0';
     ld_mel      <=  '1' when EP = E_ESPERA and modo = "11"            else '0';
-    enable      <=  '1' when EP = E_ENABLE_NOTA                       else '0';
+    enable_nota      <=  '1' when EP = E_ENABLE_NOTA                       else '0';
     vol_plus    <=  '1' when EP = E_SUBIR_VOL                         else '0';
     vol_minus   <=  '1' when EP = E_BAJAR_VOL                         else '0';
     sel_salida  <=  '1' when EP = E_ENABLE_MEL                        else '0';
@@ -119,6 +120,7 @@ begin
                --ACTIVAR LAS SEÑALES SEGÚN EL ESTADO              
       end case;
     end process; 
+    
     tecla_case : process (codigo2)
     begin
       case codigo2 is
@@ -166,6 +168,16 @@ begin
           when others => modo <= SEL_NULL;
       end case;
     end process;  
+
+    mux_salida : process( sel_salida )
+    begin
+      case sel_salida is
+        when '1' => enable <= enable_mel;
+                    nota <= nota_mel;
+        when others => enable <= enable_nota;
+                        nota <= r_nota_out;
+      end case;
+    end process ; -- mux_salida
     -- Proceso de ejemplo para copypaste
     -- ej : process( clk, reset_l )
     -- begin
@@ -174,13 +186,14 @@ begin
     --  
     --   end if ;
     -- end process ;
+
     r_nota : process( clk, reset_l )
     begin
         if reset_l = '0' then
-            nota <= X"0";
+          r_nota_out <= X"0";
         elsif rising_edge(clk) then
             if ld_nota = '1' then
-                nota <= tecla_nota;
+              r_nota_out <= tecla_nota;
             end if ;
       end if ;
     end process ;
@@ -208,6 +221,9 @@ begin
             end if;
         end if;
     end process ; 
+
+    --Registro modo
+    
     pulsado_ch_up <= ( pulsado_prev xor pulsado) and pulsado;
     pulsado_ch_down <= (pulsado_prev xor pulsado) and pulsado_prev;
 

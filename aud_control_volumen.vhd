@@ -32,7 +32,6 @@ begin
             EP <= ES;
         end if ;
     end process ; -- est_pr
-    ESTADO <= EP;
 
     maquina_de_estados : process(EP, vol_plus, vol_minus)
     begin
@@ -52,12 +51,12 @@ begin
     r_vol : process( clk, reset_l )
     begin
         if reset_l = '0' then
-            vol <= X"7";
+            vol_int <= X"7";
         elsif rising_edge(clk) then
-                if vol_plus_int = '1' and vol /= X"F" then
-                    vol <= vol + 1;
-                elsif vol_minus_int = '1' and vol /= X"0" then
-                    vol <= vol - 1;
+                if vol_plus_int = '1' and vol_int /= X"F" then
+                    vol_int <= vol_int + 1;
+                elsif vol_minus_int = '1' and vol_int /= X"0" then
+                    vol_int <= vol_int - 1;
                 end if ;
         end if ;
     end process ; -- r_vol

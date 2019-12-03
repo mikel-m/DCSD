@@ -4,13 +4,17 @@ library ieee ;
 
 entity control_del_teclado is
     port (
-        clk     : in std_logic;
-        reset_l : in std_logic;
-        ps2_clk : in std_logic;
-        ps2_dat : in std_logic;
-        pulsado : out std_logic;
-        cod_k   : out std_logic_vector(7 downto 0);
-        tecla   : out std_logic_vector(3 downto 0)
+        clk       : in std_logic;
+	    reset_l   : in std_logic;
+	    ps2_clk   : in std_logic;
+	    ps2_dat   : in std_logic;
+	    enable    : out std_logic;
+	    cod_k     : out std_logic_vector(7 downto 0);
+	    nota      : out std_logic_vector(3 downto 0);
+	    vol_plus  : out std_logic;
+	    vol_minus : out std_logic;
+	    nota_mel  : in std_logic_vector(3 downto 0);
+	    enable_mel: in std_logic
     ) ;
 end control_del_teclado ; 
 
@@ -57,10 +61,25 @@ architecture arch1 of control_del_teclado is
           break   : in std_logic;
           codigo  : in std_logic_vector(7 downto 0);
           codigo2 : out std_logic_vector(7 downto 0);
-          tecla   : out std_logic_vector(3 downto 0);
           pulsado : out std_logic
         ) ;
       end component ; 
+
+      component  tec_gestor_tecla is
+        port (
+          clk       : in std_logic;
+          reset_l   : in std_logic;
+          codigo2   : in std_logic_vector(7 downto 0);
+          pulsado   : in std_logic;
+          vol_plus  : out std_logic;
+          vol_minus : out std_logic;
+          enable    : out std_logic;
+          nota_mel  : in std_logic_vector(3 downto 0) ;
+          nota      : out std_logic_vector(3 downto 0);
+          enable_mel: in std_logic
+        ) ;
+      end component; 
+      
 
     signal ps2_clk_limpio: std_logic;
     signal ps2_dat_limpio: std_logic;
@@ -70,7 +89,9 @@ architecture arch1 of control_del_teclado is
     signal codigo_out: std_logic_vector(7 downto 0);
     signal make  : std_logic;
     signal break : std_logic;
-    
+    signal pulsado : std_logic;
+    signal tecla : std_logic_vector(3 downto 0);
+    signal cod_k_int : std_logic_vector(7 downto 0);
 begin
 
     limp_sen_comp : tec_limpiar_senales
@@ -106,12 +127,27 @@ begin
     control_pulsado_comp : tec_control_pulsado
         port map (
             clk     => clk,
-            codigo2 => cod_k,
+            codigo2 => cod_k_int,
             reset_l => reset_l,
             make    => make,
             break   => break,
             codigo  => codigo_out,
-            tecla   => tecla,
             pulsado => pulsado
         ) ;
+
+    gestor_tecla_comp :  tec_gestor_tecla
+        port map (
+            clk       => clk,
+            reset_l   => reset_l,
+            codigo2   => cod_k_int,
+            pulsado   => pulsado,
+            vol_plus  => vol_plus,
+            vol_minus => vol_minus,
+            enable    => enable,
+            nota_mel  => nota_mel,
+            nota      => tecla,
+            enable_mel=> enable_mel
+        ) ;
+        nota <= tecla;
+        cod_k <= cod_k_int;
 end architecture ;
