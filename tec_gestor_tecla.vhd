@@ -272,6 +272,8 @@ begin
             end if;
         end if;
     end process ; 
+    pulsado_ch_up <= ( pulsado_prev xor pulsado) and pulsado;
+    pulsado_ch_down <= (pulsado_prev xor pulsado) and pulsado_prev;
 
     --Registro modo
     --Proceso de ejemplo para copypaste
@@ -285,12 +287,6 @@ begin
         end if ;
       end if;
     end process ;
-
-      
-    
-    
-    pulsado_ch_up <= ( pulsado_prev xor pulsado) and pulsado;
-    pulsado_ch_down <= (pulsado_prev xor pulsado) and pulsado_prev;
-
+   
     
 end architecture ;
