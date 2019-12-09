@@ -13,8 +13,10 @@ entity control_del_teclado is
 	    nota      : out std_logic_vector(3 downto 0);
 	    vol_plus  : out std_logic;
 	    vol_minus : out std_logic;
-	    nota_mel  : in std_logic_vector(3 downto 0);
-	    enable_mel: in std_logic
+        nota_mel  : in std_logic_vector(3 downto 0);
+        tecla_mel : out std_logic_vector(1 downto 0) ;
+        enable_mel: in std_logic;
+        pulsado : out std_logic
     ) ;
 end control_del_teclado ; 
 
@@ -76,7 +78,8 @@ architecture arch1 of control_del_teclado is
           enable    : out std_logic;
           nota_mel  : in std_logic_vector(3 downto 0) ;
           nota      : out std_logic_vector(3 downto 0);
-          enable_mel: in std_logic
+          enable_mel: in std_logic;
+          tecla_mel : out std_logic_vector(1 downto 0)
         ) ;
       end component; 
       
@@ -89,7 +92,7 @@ architecture arch1 of control_del_teclado is
     signal codigo_out: std_logic_vector(7 downto 0);
     signal make  : std_logic;
     signal break : std_logic;
-    signal pulsado : std_logic;
+    signal pulsado_int : std_logic;
     signal tecla : std_logic_vector(3 downto 0);
     signal cod_k_int : std_logic_vector(7 downto 0);
 begin
@@ -132,7 +135,7 @@ begin
             make    => make,
             break   => break,
             codigo  => codigo_out,
-            pulsado => pulsado
+            pulsado => pulsado_int
         ) ;
 
     gestor_tecla_comp :  tec_gestor_tecla
@@ -140,14 +143,16 @@ begin
             clk       => clk,
             reset_l   => reset_l,
             codigo2   => cod_k_int,
-            pulsado   => pulsado,
+            pulsado   => pulsado_int,
             vol_plus  => vol_plus,
             vol_minus => vol_minus,
             enable    => enable,
             nota_mel  => nota_mel,
             nota      => tecla,
-            enable_mel=> enable_mel
+            enable_mel=> enable_mel,
+            tecla_mel => tecla_mel            
         ) ;
         nota <= tecla;
         cod_k <= cod_k_int;
+        pulsado <= pulsado_int;
 end architecture ;

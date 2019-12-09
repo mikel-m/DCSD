@@ -13,7 +13,8 @@ entity  tec_gestor_tecla is
     vol_minus : out std_logic;
     enable : out std_logic;
     nota_mel : in std_logic_vector(3 downto 0) ;
-    enable_mel: in std_logic
+    enable_mel: in std_logic;
+    tecla_mel : out std_logic_vector(1 downto 0) 
   ) ;
 end  tec_gestor_tecla; 
 
@@ -22,9 +23,8 @@ architecture arch of tec_gestor_tecla is
     signal EP, ES, ESTADO: t_estado;
    
     
-    signal mel  : std_logic_vector(3 downto 0);
+    signal mel  : std_logic_vector(1 downto 0);
     signal tecla_nota  : std_logic_vector(3 downto 0);
-    signal tecla_mel  : std_logic_vector(3 downto 0);
     signal tecla_vol  : std_logic;
     signal pulsado_ch_up: std_logic;
     signal pulsado_ch_down: std_logic;
@@ -37,6 +37,7 @@ architecture arch of tec_gestor_tecla is
     signal enable_nota: std_logic;
     signal r_nota_out: std_logic_vector(3 downto 0);
     signal r_modo_out : std_logic_vector(1 downto 0);
+    signal tecla_mel_int : std_logic_vector(1 downto 0);
 
     constant K_A : std_logic_vector(7 downto 0):= X"1C";
     constant K_S : std_logic_vector(7 downto 0):= X"1B";
@@ -58,6 +59,11 @@ architecture arch of tec_gestor_tecla is
     constant K_DOWN : std_logic_vector(7 downto 0):= X"72";
     
     constant K_1 : std_logic_vector(7 downto 0):= X"16";
+    constant K_2 : std_logic_vector(7 downto 0):= X"1E";
+    constant K_3 : std_logic_vector(7 downto 0):= X"26";
+    constant K_4 : std_logic_vector(7 downto 0):= X"25";
+
+
     --constant K_2 : std_logic_vector(7 downto 0):= X"3A";
     --constant K_3 : std_logic_vector(7 downto 0):= X"3A";
     --constant K_4 : std_logic_vector(7 downto 0):= X"3A";
@@ -75,7 +81,7 @@ begin
     vol_plus    <=  '1' when EP = E_SUBIR_VOL                         else '0';
     vol_minus   <=  '1' when EP = E_BAJAR_VOL                         else '0';
     sel_salida  <=  '1' when EP = E_ENABLE_MEL                        else '0';
-
+    tecla_mel <= mel;
     est_pr : process( clk, reset_l )
     begin
         if reset_l = '0' then
@@ -102,7 +108,7 @@ begin
                             ES <=  E_SUBIR_VOL;
                           elsif r_modo_out = "10" and tecla_vol = '0' then
                             ES <= E_BAJAR_VOL;
-                          elsif r_modo_out = "11" then
+                          else
                             ES <= E_ENABLE_MEL;
                           end if;
         when E_ESPERA_PULSADO => if pulsado_ch_down = '0' then
@@ -139,80 +145,90 @@ begin
           when K_A => tecla_nota <= X"0";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_S => tecla_nota <= X"1";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_D => tecla_nota <= X"2";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_F => tecla_nota <= X"3";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_G => tecla_nota <= X"4";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_H => tecla_nota <= X"5";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_J => tecla_nota <= X"6";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           
           when K_Z => tecla_nota <= X"7";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_X => tecla_nota <= X"8";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_C => tecla_nota <= X"9";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_V => tecla_nota <= X"A";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_B => tecla_nota <= X"B";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_N => tecla_nota <= X"C";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
           when K_M => tecla_nota <= X"D";
                       modo <= SEL_NOTA;
                       tecla_vol <= '0';
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
       
           -------VOLUMEN---------
           when K_UP => tecla_vol <= '0';
                        modo <= SEL_VOL;
                        tecla_nota <= X"0";
-                       tecla_mel <= X"0";
+                       tecla_mel_int <= "00";
           when K_DOWN => tecla_vol <= '1';
                          modo <= SEL_VOL;
                         tecla_nota <= X"0";
-                        tecla_mel <= X"0";
+                        tecla_mel_int <= "00";
                         
           -------MELODIAS---------
-          when K_1 => tecla_mel <= X"0";
+          when K_1 => tecla_mel_int <= "00";
                       modo <= SEL_MEL;
                       tecla_nota <= X"0";
                       tecla_vol <= '0';
-
-
+          when  K_2 => tecla_mel_int <= "01";
+                      modo <= SEL_MEL;
+                      tecla_nota <= X"0";
+                      tecla_vol <= '0';
+          when K_3=> tecla_mel_int <= "10";
+                      modo <= SEL_MEL;
+                      tecla_nota <= X"0";
+                      tecla_vol <= '0';
+          when K_4 => tecla_mel_int <= "11";
+                      modo <= SEL_MEL;
+                      tecla_nota <= X"0";
+                      tecla_vol <= '0';
           when others => modo <= SEL_NULL;
-                      tecla_mel <= X"0";
+                      tecla_mel_int <= "00";
                       tecla_nota <= X"0";
                       tecla_vol <= '0';
       end case;
@@ -252,10 +268,10 @@ begin
     r_mel : process( clk, reset_l )
     begin
         if reset_l = '0' then
-            mel <= X"0";
+            mel <= "00";
         elsif rising_edge(clk) then
             if ld_mel = '1' then
-                mel <= tecla_mel;
+                mel <= tecla_mel_int;
             end if ;
     end if ;
     end process ;

@@ -10,19 +10,19 @@ end mel_romescala;
 package body mel_romescala is
   constant escala15rom : rom_mel_escala := (
     X"0E", 
-    X"02", 
-    X"12", 
-    X"22", 
-    X"32", 
-    X"42", 
-    X"52", 
-    X"62", 
-    X"72", 
-    X"82", 
-    X"92", 
-    X"A2", 
-    X"B2", 
-    X"C2",  
-    X"D2" 
+    X"01", 
+    X"11", 
+    X"21", 
+    X"31", 
+    X"41", 
+    X"51", 
+    X"61", 
+    X"71", 
+    X"81", 
+    X"91", 
+    X"A1", 
+    X"B1", 
+    X"C1",  
+    X"D1" 
   );
 end package body mel_romescala;

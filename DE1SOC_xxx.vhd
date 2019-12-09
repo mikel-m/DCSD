@@ -89,8 +89,6 @@ architecture rtl_0 of DE1SOC_xxx is
 	
 	signal vol     : std_logic_vector(3 downto 0); --:= B"0000";
 
-	
-
 	signal cnt : unsigned(2 downto 0);
 
 	type rom1 is array (0 to 7) of std_logic_vector(3 downto 0);
@@ -195,15 +193,27 @@ architecture rtl_0 of DE1SOC_xxx is
 			ps2_clk   : in std_logic;
 			ps2_dat   : in std_logic;
 			enable    : out std_logic;
+			pulsado    : out std_logic;
 			cod_k     : out std_logic_vector(7 downto 0);
 			nota     : out std_logic_vector(3 downto 0);
 			vol_plus  : out std_logic;
 			vol_minus : out std_logic;
 			nota_mel  : in std_logic_vector(3 downto 0);
-			enable_mel: in std_logic
+			enable_mel: in std_logic;
+			tecla_mel : out std_logic_vector(1 downto 0)
 			) ;
 	end component ; 
 	
+	component control_melodia is 
+		port (
+			clk     : in std_logic;
+			reset_l : in std_logic;
+			pulsado : in std_logic;
+			cod_mel : in std_logic_vector(1 downto 0) ;
+			nota_mel : out std_logic_vector(3 downto 0) ;
+			enable_mel: out std_logic
+		);
+	end component; 
 
 	signal i2c_sdat	:  STD_LOGIC;
 	signal i2c_sclk	:  STD_LOGIC;
@@ -227,6 +237,7 @@ architecture rtl_0 of DE1SOC_xxx is
 	signal enable: std_logic;
 	signal nota : std_logic_vector(3 downto 0);
 	signal freq: std_logic_vector(11 downto 0);
+	signal tecla_mel : std_logic_vector(1 downto 0) ;
 	
 	signal clk_div : std_logic;
 	component div_freq is
@@ -240,6 +251,10 @@ architecture rtl_0 of DE1SOC_xxx is
 	signal cod_k   : std_logic_vector(7 downto 0);
 	signal vol_minus : std_logic;
 	signal vol_plus : std_logic;
+	signal nota_mel : std_logic_vector(3 downto 0) ;
+	signal enable_mel : std_logic;
+	signal pulsado : std_logic;
+
 begin 
 
 	df : div_freq
@@ -258,6 +273,8 @@ begin
 	--LEDR <= freq(9 downto 0);	
 	my_keys_limpio <= KEY;
 	sw_l <= SW;
+
+
 	
 	control_del_teclado_comp	: control_del_teclado
 	port map (
@@ -266,12 +283,15 @@ begin
 		ps2_clk    => PS2_CLK,
 		ps2_dat    => PS2_DAT,
 		enable     => enable,
+		pulsado    => pulsado,
 		cod_k      => cod_k,
 		nota       => nota,
 		vol_plus   => vol_plus,
 		vol_minus  => vol_minus,
-		nota_mel   => X"0",
-		enable_mel => '0'
+		nota_mel   => nota_mel,
+		enable_mel => enable_mel,
+		tecla_mel  => tecla_mel
+
 	) ;
 	
 	control_del_codec_comp : control_del_codec
@@ -291,23 +311,16 @@ begin
 		  i2c_sdat    => FPGA_I2C_SDAT,
 		  xck         => AUD_XCK
 	) ;
+	control_melodia_comp : control_melodia 
+		port map(
+			clk       => clk,
+			reset_l   => reset_l,
+			pulsado   => pulsado,
+			cod_mel   => tecla_mel,
+			nota_mel  => nota_mel,
+			enable_mel=> enable_mel
+		);
 
-	limpiar_senales : process (clk, reset_l)
-	begin
-		if reset_l  = '0' then
-			my_keys <= "111" & KEY(0); -- El 0 es el reset, que no hay que modificar
-			my_keys_1 <= "111" & KEY(0);
-			my_keys_2 <= "111" & KEY(0);
-			sw_1 <= B"00_0000_0000";
-			sw_2 <= B"00_0000_0000";
-		elsif clk'event and clk = '1' then
-			my_keys <= KEY;
-			my_keys_1 <= my_keys;
-			my_keys_2 <= my_keys_1;
-			sw_1 <= SW;
-			sw_2 <= sw_1;
-		end if ;
-	end process; -- limpiar_senales
 	
 	--------------------------7Segmentos
 	--  hex5_7: hex_7seg

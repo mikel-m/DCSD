@@ -10,12 +10,20 @@ architecture arch1 of control_teclado_tb is
 
     component control_del_teclado is
         port (
-            clk     : in std_logic;
-            reset_l : in std_logic;
-            ps2_clk : in std_logic;
-            ps2_dat : in std_logic;
+            clk       : in std_logic;
+	        reset_l   : in std_logic;
+	        ps2_clk   : in std_logic;
+	        ps2_dat   : in std_logic;
             pulsado : out std_logic;
-            tecla   : out std_logic_vector(2 downto 0)
+            nota      : out std_logic_vector(3 downto 0);
+            
+	        enable    : out std_logic;
+	        cod_k     : out std_logic_vector(7 downto 0);
+	        vol_plus  : out std_logic;
+	        vol_minus : out std_logic;
+            nota_mel  : in std_logic_vector(3 downto 0);
+            tecla_mel : out std_logic_vector(1 downto 0) ;
+            enable_mel: in std_logic
         ) ;
     end component ; 
 
@@ -29,7 +37,18 @@ architecture arch1 of control_teclado_tb is
 
     signal ps2_dat : std_logic;
     signal pulsado : std_logic;
-    signal tecla : std_logic_vector(2 downto 0);
+    signal nota : std_logic_vector(3 downto 0);
+
+    signal enable    : std_logic;
+    signal cod_k     : std_logic_vector(7 downto 0);
+    signal vol_plus  : std_logic;
+    signal vol_minus : std_logic;
+    signal nota_mel  : std_logic_vector(3 downto 0);
+    signal tecla_mel : std_logic_vector(1 downto 0) ;
+    signal enable_mel: std_logic;
+
+
+
 begin
 
     clk <= not clk after HALF_PERIOD_CLK;
@@ -58,7 +77,14 @@ begin
             ps2_clk => ps2_clk,
             ps2_dat => ps2_dat,
             pulsado => pulsado,
-            tecla   => tecla
+            nota   => nota,
+            enable => enable, 
+            cod_k => cod_k,
+            vol_plus => vol_plus,
+            vol_minus => vol_minus, 
+            nota_mel => X"0", 
+            tecla_mel => tecla_mel, 
+            enable_mel => '0'
         ) ;
 
 
@@ -67,19 +93,19 @@ begin
     begin
       ps2_dat <= '1';
       wait for PERIOD_CLK_PS2*3;
-      ps2_dat <= '0';--Start 0x23
+      ps2_dat <= '0';--Start 0x16
       wait for PERIOD_CLK_PS2;
-      ps2_dat <= '1'; --0
+      ps2_dat <= '0'; --0
       wait for PERIOD_CLK_PS2;
       ps2_dat <= '1'; --1
       wait for PERIOD_CLK_PS2;
-      ps2_dat <= '0'; --2
+      ps2_dat <= '1'; --2
       wait for PERIOD_CLK_PS2;
       ps2_dat <= '0'; --3
       wait for PERIOD_CLK_PS2;
-      ps2_dat <= '0'; --4
+      ps2_dat <= '1'; --4
       wait for PERIOD_CLK_PS2;
-      ps2_dat <= '1'; --5
+      ps2_dat <= '0'; --5
       wait for PERIOD_CLK_PS2;
       ps2_dat <= '0'; --6
       wait for PERIOD_CLK_PS2;
@@ -87,7 +113,7 @@ begin
       wait for PERIOD_CLK_PS2;
       ps2_dat <= '0'; --PAR
       wait for PERIOD_CLK_PS2; 
-      ps2_dat <= '1'; --Stop 0x23
+      ps2_dat <= '1'; --Stop 0x16
       wait for PERIOD_CLK_PS2;
 
 
@@ -115,19 +141,19 @@ begin
       wait for PERIOD_CLK_PS2;
 
 
-      ps2_dat <= '0';--Start 0x23
+      ps2_dat <= '0';--Start 0x16
       wait for PERIOD_CLK_PS2;
-      ps2_dat <= '1'; --0
+      ps2_dat <= '0'; --0
       wait for PERIOD_CLK_PS2;
       ps2_dat <= '1'; --1
       wait for PERIOD_CLK_PS2;
-      ps2_dat <= '0'; --2
+      ps2_dat <= '1'; --2
       wait for PERIOD_CLK_PS2;
       ps2_dat <= '0'; --3
       wait for PERIOD_CLK_PS2;
-      ps2_dat <= '0'; --4
+      ps2_dat <= '1'; --4
       wait for PERIOD_CLK_PS2;
-      ps2_dat <= '1'; --5
+      ps2_dat <= '0'; --5
       wait for PERIOD_CLK_PS2;
       ps2_dat <= '0'; --6
       wait for PERIOD_CLK_PS2;
@@ -135,7 +161,7 @@ begin
       wait for PERIOD_CLK_PS2;
       ps2_dat <= '0'; --PAR
       wait for PERIOD_CLK_PS2; 
-      ps2_dat <= '1'; --Stop 0x23
+      ps2_dat <= '1'; --Stop 0x16
       wait;
     end process; -- estimulos
 

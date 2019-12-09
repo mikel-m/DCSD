@@ -77,13 +77,14 @@ architecture arch1 of tec_gestor_control_tb is
 -- Byte => 1000_0001
           estimulos : process
           begin
-            codigo2 <= X"1B";
+            codigo2 <= X"16";
             pulsado <= '0';
             nota_mel <= X"3";
             enable_mel <= '1';
             wait for PERIOD_CLK_PS2*3;
             pulsado <= '1';
             wait for PERIOD_CLK_PS2;
+            nota_mel <= X"4";
             pulsado <= '0';
            wait;
           end process; -- estimulos
