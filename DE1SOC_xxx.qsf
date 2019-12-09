@@ -566,6 +566,10 @@ set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE output_files/stp1.stp
+set_global_assignment -name VHDL_FILE tec_gestor_tecla.vhd
+set_global_assignment -name VHDL_FILE mel_romescala.vhd
+set_global_assignment -name VHDL_FILE control_melodia.vhdl
+set_global_assignment -name VHDL_FILE aud_control_volumen.vhd
 set_global_assignment -name VHDL_FILE tec_limpiar_senales.vhd
 set_global_assignment -name VHDL_FILE tec_leer_byte.vhd
 set_global_assignment -name VHDL_FILE tec_control_tecla.vhd
