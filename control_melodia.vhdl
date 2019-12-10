@@ -17,10 +17,10 @@ entity  control_melodia is
 end  control_melodia; 
 
 architecture arch of control_melodia is
-    constant TIME_UNIT : unsigned(23 downto 0) := X"5B_8D_80" ;
+    constant TIME_UNIT : unsigned(23 downto 0) := X"4C_4B_40" ; --5.000.000
     --constant TIME_UNIT : unsigned(23 downto 0) := X"00_00_80" ;
 
-    TYPE t_estado is (E_INICIO, E_CARGAR_TAMA,E_INC_TAMA, E_CARGAR_DATOS, E_DISABLE_MEL, E_INC_FREQ, E_PLAY);
+    TYPE t_estado is (E_INICIO, E_ESPERA_1, E_CARGAR_TAMA,E_INC_TAMA, E_CARGAR_DATOS, E_DISABLE_MEL, E_INC_FREQ, E_PLAY, E_INC_TAMA_DIS, E_CARGAR_DATOS_DIS);
     signal EP, ES, ESTADO: t_estado;
    
     signal clr_dir : std_logic;
@@ -38,8 +38,8 @@ architecture arch of control_melodia is
     signal d_cont_inc  : std_logic;
     
     signal r_nota : std_logic_vector(3 downto 0) ; --Hacer mas cosas
-    signal r_tiempo : std_logic_vector(3 downto 0) ;
-    signal r_max : unsigned(7 downto 0) ;    
+    signal r_tiempo : std_logic_vector(7 downto 0) ;
+    signal r_max : unsigned(11 downto 0) ;    
   
     --PULSADO
     signal pulsado_prev : std_logic;
@@ -50,16 +50,21 @@ architecture arch of control_melodia is
     signal div_freq_eq500 : std_logic;
 
     signal rom_in : std_logic_vector(7 downto 0) ;
-    signal rom_out_tiempo : std_logic_vector(3 downto 0) ;
+    signal rom_out_tiempo : std_logic_vector(7 downto 0) ;
     signal rom_out_nota : std_logic_vector(3 downto 0) ;
-    signal rom_out_max : std_logic_vector(7 downto 0);
-    signal rom_out : std_logic_vector(7 downto 0);
+    signal rom_out_max : std_logic_vector(11 downto 0);
+    signal rom_out : std_logic_vector(11 downto 0);
     signal set_dir: std_logic;
 
 begin
 
     nota_mel <= r_nota;
-    enable_mel <= '1' when r_nota /= X"F" and EP /= E_DISABLE_MEL else '0';
+    enable_mel <= '1' when r_nota /= X"F" and 
+      EP /= E_INICIO and EP /= E_CARGAR_TAMA and 
+      EP /= E_INC_TAMA_DIS and 
+      EP /= E_CARGAR_DATOS_DIS and 
+      EP /= E_DISABLE_MEL 
+      else '0';
 
     --Salida UP
     clr_dir     <= '1' when EP = E_INICIO else '0';
@@ -89,17 +94,32 @@ begin
     begin
       case EP is
         when E_INICIO => if pulsado_ch_up = '1' then
-                            ES <= E_CARGAR_TAMA;
+                            ES <= E_ESPERA_1;
                           else
                             ES <= E_INICIO;
                           end if;
+        when E_ESPERA_1 => if pulsado_ch_down = '0' then
+                              ES <= E_CARGAR_TAMA;
+                            else
+                              ES <= E_INICIO;
+                            end if;
         when E_CARGAR_TAMA => if pulsado_ch_down = '0' then
-                            ES <= E_INC_TAMA;
+                            ES <= E_INC_TAMA_DIS;
+                          else
+                            ES <= E_INICIO;
+                          end if;
+        when E_INC_TAMA_DIS =>if pulsado_ch_down = '0' then
+                            ES <= E_CARGAR_DATOS_DIS;
                           else
                             ES <= E_INICIO;
                           end if;
         when E_INC_TAMA =>if pulsado_ch_down = '0' then
                             ES <= E_CARGAR_DATOS;
+                          else
+                            ES <= E_INICIO;
+                          end if;
+        when E_CARGAR_DATOS_DIS => if pulsado_ch_down = '0' then
+                            ES <= E_DISABLE_MEL;
                           else
                             ES <= E_INICIO;
                           end if;
@@ -130,7 +150,9 @@ begin
                             ES <= E_INC_TAMA;
                           else
                             ES <= E_INICIO;
-                          end if;                              
+                          end if;   
+                          
+        
       end case;
     end process;
 
@@ -210,14 +232,14 @@ begin
       case r_mel is
         when "00"   => rom_out <= escala15rom(to_integer(unsigned(rom_in)));
         when "01"   => rom_out <= bet27rom(to_integer(unsigned(rom_in)));
-        when "10"   => rom_out <= X"00";
-        when "11"   => rom_out <= X"00";
-        when others => rom_out <= X"00";
+        when "10"   => rom_out <= X"000";
+        when "11"   => rom_out <= X"000";
+        when others => rom_out <= X"000";
       end case;
     end process ; -- mux_mel
 
-    rom_out_tiempo <= rom_out(3 downto 0);
-    rom_out_nota   <= rom_out(7 downto 4);
+    rom_out_tiempo <= rom_out(7 downto 0);
+    rom_out_nota   <= rom_out(11 downto 8);
     rom_out_max    <= rom_out;
     
    
@@ -236,7 +258,7 @@ begin
     proc_r_tiempo : process( clk, reset_l )
     begin
       if reset_l = '0' then
-        r_tiempo <= X"0";
+        r_tiempo <= X"00";
       elsif rising_edge(clk) then
         if ld_tiempo = '1' then
           r_tiempo <= rom_out_tiempo;
@@ -247,7 +269,7 @@ begin
     proc_r_max : process( clk, reset_l )
     begin
       if reset_l = '0' then
-        r_max <= X"00";
+        r_max <= X"000";
       elsif rising_edge(clk) then
         if ld_max = '1' then
           r_max <= unsigned(rom_out_max);
