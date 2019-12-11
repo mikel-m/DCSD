@@ -16,6 +16,7 @@ entity control_del_teclado is
         nota_mel  : in std_logic_vector(3 downto 0);
         tecla_mel : out std_logic_vector(1 downto 0) ;
         enable_mel: in std_logic;
+        syn_mel : out std_logic;
         pulsado : out std_logic
     ) ;
 end control_del_teclado ; 
@@ -79,7 +80,8 @@ architecture arch1 of control_del_teclado is
           nota_mel  : in std_logic_vector(3 downto 0) ;
           nota      : out std_logic_vector(3 downto 0);
           enable_mel: in std_logic;
-          tecla_mel : out std_logic_vector(1 downto 0)
+          tecla_mel : out std_logic_vector(1 downto 0);
+          syn_mel : out std_logic
         ) ;
       end component; 
       
@@ -95,8 +97,8 @@ architecture arch1 of control_del_teclado is
     signal pulsado_int : std_logic;
     signal tecla : std_logic_vector(3 downto 0);
     signal cod_k_int : std_logic_vector(7 downto 0);
+    signal syn_mel_int : std_logic;
 begin
-
     limp_sen_comp : tec_limpiar_senales
     port map (
         clk            => clk,
@@ -150,9 +152,11 @@ begin
             nota_mel  => nota_mel,
             nota      => tecla,
             enable_mel=> enable_mel,
-            tecla_mel => tecla_mel            
+            tecla_mel => tecla_mel,
+            syn_mel => syn_mel_int            
         ) ;
         nota <= tecla;
         cod_k <= cod_k_int;
         pulsado <= pulsado_int;
+        syn_mel <= syn_mel_int;
 end architecture ;

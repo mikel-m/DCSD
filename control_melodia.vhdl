@@ -3,6 +3,8 @@ library ieee ;
     use ieee.numeric_std.all ;
     use work.mel_romescala.all;
     use work.mel_rombet.all;
+    use work.mel_romshr.all;
+    use work.mel_romhal.all;
 
 
 entity  control_melodia is
@@ -11,13 +13,14 @@ entity  control_melodia is
     reset_l : in std_logic;
     pulsado : in std_logic;
     cod_mel : in std_logic_vector(1 downto 0) ;
+    syn_mel : in std_logic;
     nota_mel : out std_logic_vector(3 downto 0) ;
     enable_mel: out std_logic
   ) ;
 end  control_melodia; 
 
 architecture arch of control_melodia is
-    constant TIME_UNIT : unsigned(23 downto 0) := X"4C_4B_40" ; --5.000.000
+    constant TIME_UNIT : unsigned(23 downto 0) := X"2C_4B_40" ; --5.000.000
     --constant TIME_UNIT : unsigned(23 downto 0) := X"00_00_80" ;
 
     TYPE t_estado is (E_INICIO, E_ESPERA_1, E_CARGAR_TAMA,E_INC_TAMA, E_CARGAR_DATOS, E_DISABLE_MEL, E_INC_FREQ, E_PLAY, E_INC_TAMA_DIS, E_CARGAR_DATOS_DIS);
@@ -68,14 +71,14 @@ begin
 
     --Salida UP
     clr_dir     <= '1' when EP = E_INICIO else '0';
-    ld_mel      <= '1' when EP = E_INICIO and pulsado_ch_up = '1'  else '0';
+    ld_mel      <= '1' when EP = E_ESPERA_1   else '0';
     set_dir     <= '1' when EP = E_PLAY and pulsado_ch_down = '0' and cont_t = unsigned(r_tiempo)  and dir = r_max else '0';
     ld_max      <= '1' when EP = E_CARGAR_TAMA else '0';
-    dir_inc     <= '1' when EP = E_INC_TAMA else '0';
-    ld_nota     <= '1' when EP = E_CARGAR_DATOS else '0';
-    ld_tiempo   <= '1' when EP = E_CARGAR_DATOS else '0';
-    clr_d_freq  <= '1' when EP = E_CARGAR_DATOS or EP = E_PLAY else '0';
-    clr_cont_t  <= '1' when EP = E_CARGAR_DATOS else '0';
+    dir_inc     <= '1' when EP = E_INC_TAMA or EP = E_INC_TAMA_DIS else '0';
+    ld_nota     <= '1' when EP = E_CARGAR_DATOS or EP = E_CARGAR_DATOS_DIS else '0';
+    ld_tiempo   <= '1' when EP = E_CARGAR_DATOS or EP = E_CARGAR_DATOS_DIS else '0';
+    clr_d_freq  <= '1' when EP = E_CARGAR_DATOS or EP = E_CARGAR_DATOS_DIS or EP = E_PLAY else '0';
+    clr_cont_t  <= '1' when EP = E_CARGAR_DATOS or EP = E_CARGAR_DATOS_DIS else '0';
     d_freq_inc  <= '1' when EP = E_INC_FREQ else '0';
     d_cont_inc  <= '1' when EP = E_PLAY else '0';
     div_freq_eq500 <= '1' when d_freq = TIME_UNIT else '0';
@@ -98,8 +101,10 @@ begin
                           else
                             ES <= E_INICIO;
                           end if;
-        when E_ESPERA_1 => if pulsado_ch_down = '0' then
+        when E_ESPERA_1 => if pulsado_ch_down = '0' and syn_mel = '1' then
                               ES <= E_CARGAR_TAMA;
+                            elsif pulsado_ch_down = '0' and syn_mel = '0' then
+                              ES <= E_ESPERA_1;
                             else
                               ES <= E_INICIO;
                             end if;
@@ -231,9 +236,9 @@ begin
     begin
       case r_mel is
         when "00"   => rom_out <= escala15rom(to_integer(unsigned(rom_in)));
-        when "01"   => rom_out <= bet27rom(to_integer(unsigned(rom_in)));
-        when "10"   => rom_out <= X"000";
-        when "11"   => rom_out <= X"000";
+        when "01"   => rom_out <= betrom(to_integer(unsigned(rom_in)));
+        when "10"   => rom_out <= shr27rom(to_integer(unsigned(rom_in)));
+        when "11"   => rom_out <= halrom(to_integer(unsigned(rom_in)));
         when others => rom_out <= X"000";
       end case;
     end process ; -- mux_mel

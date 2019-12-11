@@ -188,6 +188,7 @@ architecture rtl_0 of DE1SOC_xxx is
 	  
 	component control_del_teclado is
 		port (
+			syn_mel   : out std_logic;
 			clk       : in std_logic;
 			reset_l   : in std_logic;
 			ps2_clk   : in std_logic;
@@ -206,6 +207,7 @@ architecture rtl_0 of DE1SOC_xxx is
 	
 	component control_melodia is 
 		port (
+			syn_mel : in std_logic;
 			clk     : in std_logic;
 			reset_l : in std_logic;
 			pulsado : in std_logic;
@@ -254,7 +256,7 @@ architecture rtl_0 of DE1SOC_xxx is
 	signal nota_mel : std_logic_vector(3 downto 0) ;
 	signal enable_mel : std_logic;
 	signal pulsado : std_logic;
-
+	signal syn_mel : std_logic;
 begin 
 
 	df : div_freq
@@ -290,7 +292,8 @@ begin
 		vol_minus  => vol_minus,
 		nota_mel   => nota_mel,
 		enable_mel => enable_mel,
-		tecla_mel  => tecla_mel
+		tecla_mel  => tecla_mel,
+		syn_mel    => syn_mel
 
 	) ;
 	
@@ -318,7 +321,8 @@ begin
 			pulsado   => pulsado,
 			cod_mel   => tecla_mel,
 			nota_mel  => nota_mel,
-			enable_mel=> enable_mel
+			enable_mel=> enable_mel,
+			syn_mel   => syn_mel
 		);
 
 	

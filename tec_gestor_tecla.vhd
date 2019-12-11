@@ -14,7 +14,8 @@ entity  tec_gestor_tecla is
     enable : out std_logic;
     nota_mel : in std_logic_vector(3 downto 0) ;
     enable_mel: in std_logic;
-    tecla_mel : out std_logic_vector(1 downto 0) 
+    tecla_mel : out std_logic_vector(1 downto 0);
+    syn_mel : out std_logic
   ) ;
 end  tec_gestor_tecla; 
 
@@ -81,6 +82,7 @@ begin
     vol_plus    <=  '1' when EP = E_SUBIR_VOL                         else '0';
     vol_minus   <=  '1' when EP = E_BAJAR_VOL                         else '0';
     sel_salida  <=  '1' when EP = E_ENABLE_MEL                        else '0';
+    syn_mel     <=  '1' when EP = E_ENABLE_MEL                        else '0';
     tecla_mel <= mel;
     est_pr : process( clk, reset_l )
     begin
