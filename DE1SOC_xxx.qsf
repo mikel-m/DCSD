@@ -663,6 +663,9 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLE
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=sld_reserved_DE1SOC_xxx_auto_signaltap_0_1_d7bc," -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=1" -section_id auto_signaltap_0
+set_global_assignment -name VHDL_FILE mel_rom_soundofsilence.vhd
+set_global_assignment -name VHDL_FILE mel_rom9sinfonia.vhd
+set_global_assignment -name VHDL_FILE mel_romcumple.vhd
 set_global_assignment -name VHDL_FILE mel_romshr.vhd
 set_global_assignment -name VHDL_FILE mel_romhal.vhd
 set_global_assignment -name VHDL_FILE mel_rombet.vhd

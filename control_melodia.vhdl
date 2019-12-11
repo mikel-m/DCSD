@@ -2,9 +2,9 @@ library ieee ;
     use ieee.std_logic_1164.all ;
     use ieee.numeric_std.all ;
     use work.mel_romescala.all;
-    use work.mel_rombet.all;
-    use work.mel_romshr.all;
-    use work.mel_romhal.all;
+    use work.mel_rom_9sinfonia.all;
+    use work.mel_rom_soundofsilence.all;
+    use work.mel_romcumple.all;
 
 
 entity  control_melodia is
@@ -49,7 +49,7 @@ architecture arch of control_melodia is
     signal pulsado_ch_down : std_logic;
     signal pulsado_ch_up : std_logic;
 
-    signal cont_t : unsigned(3 downto 0); -- Contador de tiempo
+    signal cont_t : unsigned(7 downto 0); -- Contador de tiempo
     signal div_freq_eq500 : std_logic;
 
     signal rom_in : std_logic_vector(7 downto 0) ;
@@ -210,10 +210,10 @@ begin
     cont_t_counter : process( clk, reset_l )
     begin
       if reset_l = '0' then
-        cont_t <= X"0";
+        cont_t <= X"00";
       elsif rising_edge(clk) then
         if clr_cont_t = '1' then
-          cont_t <= X"0";
+          cont_t <= X"00";
         elsif d_cont_inc = '1' then
           cont_t <= cont_t + 1;
         end if ;
@@ -236,9 +236,9 @@ begin
     begin
       case r_mel is
         when "00"   => rom_out <= escala15rom(to_integer(unsigned(rom_in)));
-        when "01"   => rom_out <= betrom(to_integer(unsigned(rom_in)));
-        when "10"   => rom_out <= shr27rom(to_integer(unsigned(rom_in)));
-        when "11"   => rom_out <= halrom(to_integer(unsigned(rom_in)));
+        when "01"   => rom_out <= sinfoniarom(to_integer(unsigned(rom_in)));
+        when "10"   => rom_out <= soundofsilence_rom(to_integer(unsigned(rom_in)));
+        when "11"   => rom_out <= cumplerom(to_integer(unsigned(rom_in)));
         when others => rom_out <= X"000";
       end case;
     end process ; -- mux_mel
