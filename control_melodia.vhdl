@@ -20,7 +20,7 @@ entity  control_melodia is
 end  control_melodia; 
 
 architecture arch of control_melodia is
-    constant TIME_UNIT : unsigned(23 downto 0) := X"2C_4B_40" ; --5.000.000
+    constant TIME_UNIT : unsigned(23 downto 0) := X"18_4B_40" ; --5.000.000
     --constant TIME_UNIT : unsigned(23 downto 0) := X"00_00_80" ;
 
     TYPE t_estado is (E_INICIO, E_ESPERA_1, E_CARGAR_TAMA,E_INC_TAMA, E_CARGAR_DATOS, E_DISABLE_MEL, E_INC_FREQ, E_PLAY, E_INC_TAMA_DIS, E_CARGAR_DATOS_DIS);

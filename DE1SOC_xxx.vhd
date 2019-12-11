@@ -269,10 +269,10 @@ begin
 	--  Input PINs Asignements
     clk <= CLOCK_50; 
 	reset_l <= KEY(0);
-	LEDR(0) <= enable;
+	--LEDR(0) <= enable;
 
 	-- Output PINs Asignements
-	--LEDR <= freq(9 downto 0);	
+	LEDR <= freq(9 downto 0);	
 	my_keys_limpio <= KEY;
 	sw_l <= SW;
 

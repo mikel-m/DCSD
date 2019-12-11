@@ -11,7 +11,6 @@ package body mel_romshr is
   constant shr27rom : rom_mel_shr := ( 
     --- I'm Believer
     X"0A9", --169 lineas
-    X"F18",
     X"406",--Sol (N)
     X"F01",
     X"406",--sol(N)
@@ -25,7 +24,7 @@ package body mel_romshr is
     --
     X"506", --la(N)
     X"F01",
-    X"506" --la(N)
+    X"506", --la(N)
     X"F01",
     X"506", --la(N)
     X"F01",
@@ -54,7 +53,7 @@ package body mel_romshr is
     --
     X"506", --la(N)
     X"F01",
-    X"506" --la(N)
+    X"506", --la(N)
     X"F01",
     X"506", --la(N)
     X"F01",

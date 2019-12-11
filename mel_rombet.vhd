@@ -3,13 +3,13 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 package mel_rombet is
-  type rom_mel_bet is array (0 to 54 ) of std_logic_vector(11 downto 0);
+  type rom_mel_bet is array (0 to 52 ) of std_logic_vector(11 downto 0);
   constant betrom : rom_mel_bet;
 end mel_rombet;
 
 package body mel_rombet is
   constant betrom : rom_mel_bet := ( 
-    X"036",
+    X"034",
     X"60C",--SI
     X"F01", 
     X"006",--DO
@@ -36,8 +36,6 @@ package body mel_rombet is
     X"F01", 
     X"506", --LA
     X"F01",
-    X"506", --LA
-    X"F00",
     X"60C", --SI
     X"F01", --30
     X"006", --DO
